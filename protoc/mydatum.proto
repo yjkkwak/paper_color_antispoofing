@@ -1,0 +1,13 @@
+syntax="proto3";
+
+package tutorial;
+
+message myDatum {
+  int32 channels = 1;
+  int32 height = 2;
+  int32 width = 3;
+  // the actual image data, in bytes
+  bytes data = 4;
+  int32 label = 5;
+  string path = 6;
+}

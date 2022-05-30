@@ -1,0 +1,27 @@
+git remote add master https://github.com/yjkkwak/color_antispoofing.git
+git remote -v
+git push master
+git push --set-upstream master master
+git branch
+git config --global credential.helper store
+
+git config user.email "yjkkwak"
+git config user.name "yjkwak"
+
+
+git config --global credential.helper store  (깃아이디비번저장)
+https://pinedance.github.io/blog/2019/05/29/Git-Credential
+
+
+git config --local credential.helper ""  (깃 아이디 비번 초기화)
+https://stackoverflow.com/questions/13103083/how-do-i-push-to-github-under-a-different-username
+
+
+
+
+yjkkwak
+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
+
+
+vivaan-yjkwak 
+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
