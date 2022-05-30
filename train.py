@@ -8,7 +8,7 @@ from torchvision import transforms as T
 from torchvision import models
 from torch.utils.data import DataLoader
 
-from networks import getbaseresnet18
+from networks import getresnet18, getbaseresnet18
 from lmdbdataset import lmdbDataset
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
@@ -16,6 +16,7 @@ import shortuuid
 from datetime import datetime
 from test import testmodel
 from shutil import copyfile
+import glob
 
 random_seed = 20220406
 torch.manual_seed(random_seed)
@@ -126,7 +127,8 @@ def trainmodel():
   averagemetermap["acc_am"] = AverageMeter()
   epochtimer = Timer()
 
-  mynet = getbaseresnet18()
+  #mynet = getbaseresnet18()
+  mynet = getresnet18()
   mynet = mynet.cuda()
 
   transforms = T.Compose([T.RandomCrop((256, 256)),
@@ -160,6 +162,7 @@ def trainmodel():
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     startepoch = checkpoint['epoch'] + 1
 
+
   for epoch in range(startepoch, args.epochs):
     mynet.train()
     epochtimer.tic()
@@ -169,8 +172,8 @@ def trainmodel():
     logger.print (strprint)
     scheduler.step()
     save_ckpt(epoch, mynet, optimizer)
-    if epoch > 20:
-      testmodel(epoch, mynet, testdbpath, strckptpath)
+
+    testmodel(epoch, mynet, testdbpath, strckptpath)
 
 
 if __name__ == '__main__':

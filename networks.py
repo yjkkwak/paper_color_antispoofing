@@ -1,9 +1,18 @@
 from utils import Hook, nested_children
 # from torchvision import models
+from models.myresnet import myresnet18
 from models.baseresnet import baseresnet18
 from models.metricresnet import metricresnet18, metricpathcnet
 import torch
 import torch.nn as nn
+
+
+def getresnet18():
+  """
+  """
+  resnet18 = myresnet18(pretrained=False, num_classes=2)
+
+  return resnet18
 
 def getbaseresnet18():
   resnet18 = baseresnet18(pretrained=True)

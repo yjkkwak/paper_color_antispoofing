@@ -38,7 +38,7 @@ def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch,
                                                       "e{}".format(nepoch),
                                                       "bsize{}".format(strbsize),
                                                       "gpu{}".format(strgpu))
-  strmeta = "clsloss_resnet18_{}".format(stropti)
+  strmeta = "clsloss_smallresnet18_{}".format(stropti)
   screenoption = "screen -L -Logfile {}.txt -d -m ".format(strlogoption)
   lmdbpath = "/home/user/work_db/v4C3/{}.db".format(strDB)
   strcmd = "{} {} --ckptpath {} --lmdbpath {} --lr {}  --gamma {} --opt {} --epochs {} --batch_size {} --GPU {} --meta {} ".format(
