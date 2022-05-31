@@ -15,11 +15,8 @@ def ssan_performances_val(score_val_filename):
     try:
       count += 1
       tokens = line.split()
-      label = 0
-      if "/real/" in tokens[2]:
-        label = 1
-
-      score = float(tokens[1])  # live socre
+      label = float(tokens[0])  # label
+      score = float(tokens[2])  # live socre
       val_scores.append(score)
       val_labels.append(label)
       data.append({'map_score': score, 'label': label})
@@ -29,6 +26,7 @@ def ssan_performances_val(score_val_filename):
         num_fake += 1
     except:
       continue
+
 
   fpr, tpr, threshold = roc_curve(val_labels, val_scores, pos_label=1)
 
@@ -236,9 +234,11 @@ def get_HTER_at_thr(probs, labels, thr):
 
 
 if __name__ == '__main__':
-  acc, fpr, frr, hter, auc, best_thr = ssan_performances_val(
-    "/home/user/model_2022/v220513_02/Train_v220419_01_CelebA_SiW_LDRGB_LD3007_OULUNPU_1by1_260x260_220525_8LJN426mjCq5E3S6XQxR8C_bsize512_optsgd_lr0.005_gamma_0.92_epochs_81_meta_arcloss163264_w1_1.0_SGD/Dev_v220419_01_OULUNPU_1by1_260x260/78.score")
-  print(acc, fpr, frr, hter, auc, best_thr)
+  # acc, fpr, frr, hter, auc, best_thr = ssan_performances_val(
+  #   "/home/user/model_2022/v220513_02/Train_v220419_01_CelebA_SiW_LDRGB_LD3007_OULUNPU_1by1_260x260_220525_8LJN426mjCq5E3S6XQxR8C_bsize512_optsgd_lr0.005_gamma_0.92_epochs_81_meta_arcloss163264_w1_1.0_SGD/Dev_v220419_01_OULUNPU_1by1_260x260/78.score")
+  # print(acc, fpr, frr, hter, auc, best_thr)
+
+  ssan_performances_val("/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220530_QDVJ3zhtjCMDBRf8SaUR4Y_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/Test_Protocal_4C3_REPLAY_1by1_260x260/01.score")
 
   # cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold = ssdg_performacne_val("/home/user/model_2022/v220513_02/Train_v220419_01_CelebA_SiW_LDRGB_LD3007_OULUNPU_1by1_260x260_220525_8LJN426mjCq5E3S6XQxR8C_bsize512_optsgd_lr0.005_gamma_0.92_epochs_81_meta_arcloss163264_w1_1.0_SGD/Dev_v220419_01_OULUNPU_1by1_260x260/78.score")
   # print (cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold)

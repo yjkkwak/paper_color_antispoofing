@@ -7,6 +7,8 @@ import argparse
 from torchvision import transforms as T
 from torchvision import models
 from torch.utils.data import DataLoader
+from augs.cutmix import cutmix_data, mixup_criterion
+
 
 from networks import getresnet18, getbaseresnet18
 from lmdbdataset import lmdbDataset
@@ -96,10 +98,12 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   for index, (images, labels, imgpath) in enumerate(trainloader):
     fbtimer.tic()
     images, labels = images.cuda(), labels.cuda()
+    images, mixlabel = cutmix_data(images, labels)
     optimizer.zero_grad()
     logit = model(images)
     # prob = probsm(logit)
-    loss = criterion(logit, labels)
+    loss1 = criterion(logit, labels)
+    loss = mixup_criterion(criterion, logit, mixlabel[0], mixlabel[1], mixlabel[2]).mean()
     acc = accuracy(logit, labels)
     loss.backward()
     optimizer.step()

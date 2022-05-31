@@ -8,6 +8,8 @@ from PIL import Image
 import mydata.mydatum_pb2 as mydatum_pb2
 from torchvision import transforms as T
 from torchvision.transforms.functional import to_pil_image
+from augs.cutmix import cutmix_data
+
 class lmdbDataset(tdata.Dataset):
   def __init__(self, db_path, transform=None):
     self.env = None
@@ -64,6 +66,13 @@ if __name__ == '__main__':
     # imgp3 = item["imgp3"]
     # label = item["label"]
     # imgpath = item["imgpath"]
+    imgmix, mixlabel = cutmix_data(imgp1, label)
+    print(imgp1.shape)
+    print (imgmix.shape)
+    print(label)
+    print (mixlabel)
+    break
+
 
     liveidx = torch.where(label == 1)
     fakeidx = torch.where(label == 0)

@@ -54,14 +54,19 @@ def testmetricmodel(epoch, model, testdbpath, strckptpath):
   model.eval()
   probsm = nn.Softmax(dim=1)
 
+  writelist = []
   for index, (images, labels, imgpath) in enumerate(testloader):
     images, labels = images.cuda(), labels.cuda()
-    logit, fc5 = model(images)
+    logit = model(images)
     prob = probsm(logit)
     acc = accuracy(logit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
-      the_file.write("{:.5f} {:.5f} {}\n".format(float(prob[idx][0]), float(prob[idx][1]), imgpathitem))
+      writelist.append(
+        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(prob[idx][0]), float(prob[idx][1])))
+
+  for witem in writelist:
+    the_file.write(witem)
   the_file.close()
 
   ssan_performances_val(strscorepath)
@@ -89,6 +94,7 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   model.eval()
   probsm = nn.Softmax(dim=1)
 
+  writelist = []
   for index, (images, labels, imgpath) in enumerate(testloader):
     images, labels = images.cuda(), labels.cuda()
     logit = model(images)
@@ -96,7 +102,11 @@ def testmodel(epoch, model, testdbpath, strckptpath):
     acc = accuracy(logit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
-      the_file.write("{:.5f} {:.5f} {}\n".format(float(prob[idx][0]), float(prob[idx][1]), imgpathitem))
+      writelist.append(
+        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(prob[idx][0]), float(prob[idx][1])))
+
+  for witem in writelist:
+    the_file.write(witem)
   the_file.close()
 
   ssan_performances_val(strscorepath)
@@ -138,7 +148,7 @@ def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
 
   model.eval()
   probsm = nn.Softmax(dim=1)
-
+  writelist = []
   for index, (images, labels, imgpath) in enumerate(testloader):
     images, labels = images.cuda(), labels.cuda()
     logit = model(images)
@@ -146,7 +156,10 @@ def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
     acc = accuracy(logit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
-      the_file.write("{:.5f} {:.5f} {}\n".format(float(prob[idx][0]), float(prob[idx][1]), imgpathitem))
+      writelist.append("{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(prob[idx][0]), float(prob[idx][1])))
+
+  for witem in writelist:
+    the_file.write(witem)
   the_file.close()
 
   ssan_performances_val(strscorepath)
@@ -164,51 +177,48 @@ if __name__ == '__main__':
 
   print(args)
 
-  basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220530_QDVJ3zhtjCMDBRf8SaUR4Y_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
-  testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_REPLAY_1by1_260x260.db"
-  ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
-  for ckptpath in ckptlist:
-    ffff = getbasenamewoext(ckptpath)
-    if int(ffff[-2:]) < 10:
-      print (ffff)
-      testwckpt(None,
-                ckptpath,
-                testdbpath,
-                basepath)
-
-
-  basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260_220530_KQdwNVgBih3Ws8epSM4PTt_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
-  testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_OULU_1by1_260x260.db"
-  ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
-  for ckptpath in ckptlist:
-    ffff = getbasenamewoext(ckptpath)
-    if int(ffff[-2:]) < 10:
-      print (ffff)
-      testwckpt(None,
-                ckptpath,
-                testdbpath,
-                basepath)
+  # basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220530_QDVJ3zhtjCMDBRf8SaUR4Y_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
+  # testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_REPLAY_1by1_260x260.db"
+  # ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
+  # for ckptpath in ckptlist:
+  #   ffff = getbasenamewoext(ckptpath)
+  #   print (ffff)
+  #   testwckpt(None,
+  #             ckptpath,
+  #             testdbpath,
+  #             basepath)
+  #
+  #
+  #
+  # basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260_220530_KQdwNVgBih3Ws8epSM4PTt_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
+  # testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_OULU_1by1_260x260.db"
+  # ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
+  # for ckptpath in ckptlist:
+  #   ffff = getbasenamewoext(ckptpath)
+  #   print (ffff)
+  #   testwckpt(None,
+  #             ckptpath,
+  #             testdbpath,
+  #             basepath)
 
   basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220530_YzxoCrrET3wSVPY7CkWjE9_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
   testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db"
   ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
   for ckptpath in ckptlist:
     ffff = getbasenamewoext(ckptpath)
-    if int(ffff[-2:]) < 10:
-      print(ffff)
-      testwckpt(None,
-                ckptpath,
-                testdbpath,
-                basepath)
+    print(ffff)
+    testwckpt(None,
+              ckptpath,
+              testdbpath,
+              basepath)
 
   basepath = "/home/user/model_2022/v4C3/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220530_J4p8ZsKf79woquYJSS2Jo5_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/"
   testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db"
   ckptlist = glob.glob("{}/**/*.ckpt".format(basepath), recursive=True)
   for ckptpath in ckptlist:
     ffff = getbasenamewoext(ckptpath)
-    if int(ffff[-2:]) < 10:
-      print(ffff)
-      testwckpt(None,
-                ckptpath,
-                testdbpath,
-                basepath)
+    print(ffff)
+    testwckpt(None,
+              ckptpath,
+              testdbpath,
+              basepath)
