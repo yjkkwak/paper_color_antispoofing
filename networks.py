@@ -14,8 +14,8 @@ def getresnet18():
 
   return resnet18
 
-def getbaseresnet18():
-  resnet18 = baseresnet18(pretrained=True)
+def getbaseresnet18(numclasses=2):
+  resnet18 = baseresnet18(pretrained=True, numofcls=numclasses)
   return resnet18
 
 def getmetricresnet18():
@@ -28,8 +28,8 @@ def getpatchnetresnet18():
 
 def debugmode():
   rinput = torch.randn((1, 3, 256, 256))
-  #mynet = getresnet18()
-  mynet = getmetricresnet18()
+  mynet = getbaseresnet18(numclasses=11)
+  # mynet = getmetricresnet18()
   print (mynet)
   forwardhook = []
   for l in nested_children(mynet):

@@ -252,6 +252,7 @@ def _baseresnet(
     layers: List[int],
     pretrained: bool,
     progress: bool,
+    numofcls: int,
     **kwargs: Any
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
@@ -260,12 +261,11 @@ def _baseresnet(
         state_dict = torch.load("/home/user/work_2022/AntiSpoofing/models/resnet18-f37072fd.pth")
         model.load_state_dict(state_dict)
 
-    model.fc = nn.Linear(model.fc.in_features, 2)
+    model.fc = nn.Linear(model.fc.in_features, numofcls)
     print ("reset linear")
     return model
 
-
-def baseresnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
+def baseresnet18(pretrained: bool = False, progress: bool = True, numofcls: int = 2, **kwargs: Any) -> ResNet:
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
@@ -273,13 +273,13 @@ def baseresnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any)
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _baseresnet('baseresnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
+    return _baseresnet('baseresnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, numofcls,
                    **kwargs)
 
 
 def debugmode():
   rinput = torch.randn((1, 3, 256, 256))
-  mynet = baseresnet18(pretrained=True, num_classes=1000)
+  mynet = baseresnet18(pretrained=True, num_classes=1000, numofcls=11)
   print (mynet)
   forwardhook = []
   for l in nested_children(mynet):
