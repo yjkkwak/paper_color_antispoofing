@@ -7,7 +7,7 @@ import argparse
 from torchvision import transforms as T
 from torchvision import models
 from torch.utils.data import DataLoader
-from augs.cutmix import cutmix_data, mixup_criterion
+from augs.cutmix import cutmix_data
 
 
 from networks import getresnet18, getbaseresnet18
@@ -64,11 +64,11 @@ if args.resume != "":
   struuid = os.path.basename(resumedir)
 
 strckptpath = os.path.join(args.ckptpath, struuid)
-strlogpath = "/home/user/work_2022/logworkspace/{}.log".format(struuid)
+strlogpath = "/home/user/vivaanspace/logworkspace/{}.log".format(struuid)
 logger = Logger(strlogpath)
 logger.print(args)
 
-dbprefix = "/home/user/work_db/v4C3"
+dbprefix = "/home/user/vivaanspace/work_db/v4C3"
 
 if "CASIA_MSU_OULU" in args.lmdbpath:
   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db")
@@ -94,17 +94,21 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   #_t['forward_pass'].tic()
   fbtimer = Timer()
   totaliter = len(trainloader)
-  # probsm = nn.Softmax(dim=1)
+  regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
+  probsm = nn.Softmax(dim=1)
   for index, (images, labels, imgpath) in enumerate(trainloader):
     fbtimer.tic()
+    labels = labels.type(torch.FloatTensor)
     images, labels = images.cuda(), labels.cuda()
-    images, mixlabel = cutmix_data(images, labels)
     optimizer.zero_grad()
     logit = model(images)
-    # prob = probsm(logit)
-    loss1 = criterion(logit, labels)
-    loss = mixup_criterion(criterion, logit, mixlabel[0], mixlabel[1], mixlabel[2]).mean()
-    acc = accuracy(logit, labels)
+    prob = probsm(logit)
+    expectprob = torch.sum(regrsteps * prob, dim=1)
+    loss = criterion(expectprob, labels)
+    tmplogit = torch.zeros(images.size(0), 2).cuda()
+    tmplogit[:, 1] = expectprob
+    tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
+    acc = accuracy(tmplogit, labels)
     loss.backward()
     optimizer.step()
     averagemetermap["loss_am"].update(loss.item())
@@ -131,7 +135,7 @@ def trainmodel():
   averagemetermap["acc_am"] = AverageMeter()
   epochtimer = Timer()
 
-  mynet = getbaseresnet18()
+  mynet = getbaseresnet18(numclasses=11)
   # mynet = getresnet18()
   mynet = mynet.cuda()
 
@@ -144,7 +148,8 @@ def trainmodel():
   logger.print(mynet)
   logger.print(traindataset)
   trainloader = DataLoader(traindataset, batch_size=args.batch_size, shuffle=True, num_workers=args.works, pin_memory=True)
-  criterion = nn.CrossEntropyLoss().cuda()
+  #criterion = nn.CrossEntropyLoss().cuda()
+  criterion = nn.MSELoss().cuda()
   if args.opt.lower() == "adam":
     # works
     optimizer = optim.Adam(mynet.parameters(), lr=args.lr, weight_decay=5e-4)
