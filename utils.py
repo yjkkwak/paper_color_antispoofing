@@ -83,7 +83,7 @@ class Logger(object):
 
   def print(self, strlog):
     self.file.write("{}\n".format(strlog))
-    #self.file.flush()
+    self.file.flush()
     print(strlog)
 
   def close(self):

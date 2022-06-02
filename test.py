@@ -92,18 +92,23 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   testloader = DataLoader(testdataset, batch_size=256, shuffle=False, num_workers=0, pin_memory=True)
 
   model.eval()
-  probsm = nn.Softmax(dim=1)
 
   writelist = []
+  regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
+  probsm = nn.Softmax(dim=1)
   for index, (images, labels, imgpath) in enumerate(testloader):
     images, labels = images.cuda(), labels.cuda()
     logit = model(images)
     prob = probsm(logit)
-    acc = accuracy(logit, labels)
+    expectprob = torch.sum(regrsteps * prob, dim=1)
+    tmplogit = torch.zeros(images.size(0), 2).cuda()
+    tmplogit[:, 1] = expectprob
+    tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
+    acc = accuracy(tmplogit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
       writelist.append(
-        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(prob[idx][0]), float(prob[idx][1])))
+        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(tmplogit[idx][0]), float(tmplogit[idx][1])))
 
   for witem in writelist:
     the_file.write(witem)

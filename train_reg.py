@@ -11,7 +11,7 @@ from augs.cutmix import cutmix_data
 
 
 from networks import getresnet18, getbaseresnet18
-from lmdbdataset import lmdbDataset
+from lmdbdataset import lmdbDatasetwmixup
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
 import shortuuid
@@ -64,11 +64,11 @@ if args.resume != "":
   struuid = os.path.basename(resumedir)
 
 strckptpath = os.path.join(args.ckptpath, struuid)
-strlogpath = "/home/user/vivaanspace/logworkspace/{}.log".format(struuid)
+strlogpath = "/home/user/work_2022/logworkspace/{}.log".format(struuid)
 logger = Logger(strlogpath)
 logger.print(args)
 
-dbprefix = "/home/user/vivaanspace/work_db/v4C3"
+dbprefix = "/home/user/work_db/v4C3"
 
 if "CASIA_MSU_OULU" in args.lmdbpath:
   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db")
@@ -96,8 +96,10 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   totaliter = len(trainloader)
   regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
   probsm = nn.Softmax(dim=1)
-  for index, (images, labels, imgpath) in enumerate(trainloader):
+  for index, (tmpimages, tmplabels, imgpath, rimg, rlab) in enumerate(trainloader):
     fbtimer.tic()
+    images = torch.cat((tmpimages, rimg), dim=0)
+    labels = torch.cat((tmplabels, rlab), dim=0)
     labels = labels.type(torch.FloatTensor)
     images, labels = images.cuda(), labels.cuda()
     optimizer.zero_grad()
@@ -143,7 +145,7 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDataset(args.lmdbpath, transforms)
+  traindataset = lmdbDatasetwmixup(args.lmdbpath, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)

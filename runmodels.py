@@ -1,11 +1,8 @@
 import os
 
-
-
-
 def runjobs():
   strbaseckpt = "/home/user/model_2022/v4C3/"
-  strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_mixup.py"
+  strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_reg.py"
 
   strlr = 0.0001
   strgamma = 0.90
@@ -30,10 +27,10 @@ def runjobs():
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu)
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu):
-  strmeta = "clsloss_resnet18_{}_wmixup".format(stropti)
+  strmeta = "mseloss_resnet18_{}_wregmixup".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
-                                                      "Clsloss",
+                                                      "MSEloss",
                                                       "lr{}".format(strlr),
                                                       "gamma{}".format(strgamma),
                                                       "e{}".format(nepoch),
