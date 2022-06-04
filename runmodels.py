@@ -27,10 +27,10 @@ def runjobs():
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu)
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu):
-  strmeta = "mseloss_resnet18_{}_wregmixup".format(stropti)
+  strmeta = "mseclsloss_resnet18_{}_wregmixuphalf".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
-                                                      "MSEloss",
+                                                      "MSECLSloss",
                                                       "lr{}".format(strlr),
                                                       "gamma{}".format(strgamma),
                                                       "e{}".format(nepoch),

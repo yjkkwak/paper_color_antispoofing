@@ -98,19 +98,26 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   probsm = nn.Softmax(dim=1)
   for index, (tmpimages, tmplabels, imgpath, rimg, rlab) in enumerate(trainloader):
     fbtimer.tic()
-    images = torch.cat((tmpimages, rimg), dim=0)
-    labels = torch.cat((tmplabels, rlab), dim=0)
+    rand_idx = torch.randperm(rimg.shape[0])
+    images = torch.cat((tmpimages, rimg[rand_idx[0:rimg.shape[0] // 2],]), dim=0)
+    labels = torch.cat((tmplabels, rlab[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
     labels = labels.type(torch.FloatTensor)
     images, labels = images.cuda(), labels.cuda()
+    discretelabels = labels.clone()
+    discretelabels = discretelabels * 10
+    discretelabels = discretelabels.type(torch.LongTensor)
+    discretelabels = discretelabels.cuda()
     optimizer.zero_grad()
     logit = model(images)
     prob = probsm(logit)
     expectprob = torch.sum(regrsteps * prob, dim=1)
-    loss = criterion(expectprob, labels)
+    mseloss = criterion["mse"](expectprob, labels)
+    clsloss = criterion["cls"](logit, discretelabels)
+    loss = mseloss + clsloss
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
-    acc = accuracy(tmplogit, labels)
+    acc = accuracy(tmplogit[0:tmpimages.shape[0],:], labels[0:tmplabels.shape[0]])
     loss.backward()
     optimizer.step()
     averagemetermap["loss_am"].update(loss.item())
@@ -150,8 +157,9 @@ def trainmodel():
   logger.print(mynet)
   logger.print(traindataset)
   trainloader = DataLoader(traindataset, batch_size=args.batch_size, shuffle=True, num_workers=args.works, pin_memory=True)
-  #criterion = nn.CrossEntropyLoss().cuda()
-  criterion = nn.MSELoss().cuda()
+  criterion = {}
+  criterion["cls"] = nn.CrossEntropyLoss().cuda()
+  criterion["mse"] = nn.MSELoss().cuda()
   if args.opt.lower() == "adam":
     # works
     optimizer = optim.Adam(mynet.parameters(), lr=args.lr, weight_decay=5e-4)
@@ -183,8 +191,8 @@ def trainmodel():
     logger.print (strprint)
     scheduler.step()
     save_ckpt(epoch, mynet, optimizer)
-
-    testmodel(epoch, mynet, testdbpath, strckptpath)
+    if epoch > 5:
+      testmodel(epoch, mynet, testdbpath, strckptpath)
 
 
 if __name__ == '__main__':

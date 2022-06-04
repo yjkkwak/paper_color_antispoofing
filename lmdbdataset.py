@@ -143,9 +143,15 @@ if __name__ == '__main__':
                           transforms)
   trainloader = DataLoader(mydataset, batch_size=10, shuffle=True, num_workers=0, pin_memory=False)
   for imgp1, label, imgpath, rimg, lam in trainloader:
-    vimgs = torch.cat((imgp1, rimg), dim=0)
-    vlabels = torch.cat((label, lam), dim=0)
+    rand_idx = torch.randperm(rimg.shape[0])
+    vimgs = torch.cat((imgp1, rimg[rand_idx[0:rimg.shape[0]//2],]), dim=0)
+    vlabels = torch.cat((label, lam[rand_idx[0:rimg.shape[0]//2]]), dim=0)
+    print (label)
+    print(lam[rand_idx[0:rimg.shape[0]//2]])
     print (vlabels)
+    vlabels = vlabels * 10
+    vlabels = vlabels.type(torch.LongTensor)
+    print(vlabels)
     #print (vimgs.shape, vlabels.shape)
     # imgp1 = item["imgp1"]
     # imgp2 = item["imgp2"]
@@ -157,8 +163,8 @@ if __name__ == '__main__':
     # print (rimg.shape)
     # print(label.shape)
     # print (lam.shape)
-    # to_pil_image(imgp1[0]).show()
-    # to_pil_image(rimg[0]).show()
+    to_pil_image(imgp1[0]).show()
+    to_pil_image(rimg[0]).show()
     break
 
 
