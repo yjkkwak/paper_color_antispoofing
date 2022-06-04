@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from augs.cutmix import cutmix_data
 
 
-from networks import getresnet18, getbaseresnet18
+from networks import getresnet18, getbaseresnet18, getbaseresnet18wgrl
 from lmdbdataset import lmdbDatasetwmixup
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
@@ -96,28 +96,22 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   totaliter = len(trainloader)
   regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
   probsm = nn.Softmax(dim=1)
-  for index, (tmpimages, tmplabels, imgpath, rimg, rlab, uid1, uid2) in enumerate(trainloader):
+  for index, (images, labels, imgpath, rimg, rlab, uid1, uid2) in enumerate(trainloader):
     fbtimer.tic()
-    rand_idx = torch.randperm(rimg.shape[0])
-    images = torch.cat((tmpimages, rimg[rand_idx[0:rimg.shape[0] // 2],]), dim=0)
-    labels = torch.cat((tmplabels, rlab[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
     labels = labels.type(torch.FloatTensor)
     images, labels = images.cuda(), labels.cuda()
-    discretelabels = labels.clone()
-    discretelabels = discretelabels * 10
-    discretelabels = discretelabels.type(torch.LongTensor)
-    discretelabels = discretelabels.cuda()
+    uid1 = uid1.cuda()
     optimizer.zero_grad()
-    logit = model(images)
+    logit, dislogit = model(images)
     prob = probsm(logit)
     expectprob = torch.sum(regrsteps * prob, dim=1)
     mseloss = criterion["mse"](expectprob, labels)
-    clsloss = criterion["cls"](logit, discretelabels)
-    loss = mseloss + clsloss
+    advclsloss = criterion["cls"](dislogit, uid1)
+    loss = mseloss + advclsloss
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
-    acc = accuracy(tmplogit[0:tmpimages.shape[0],:], labels[0:tmplabels.shape[0]])
+    acc = accuracy(tmplogit, labels)
     loss.backward()
     optimizer.step()
     averagemetermap["loss_am"].update(loss.item())
@@ -144,7 +138,7 @@ def trainmodel():
   averagemetermap["acc_am"] = AverageMeter()
   epochtimer = Timer()
 
-  mynet = getbaseresnet18(numclasses=11)
+  mynet = getbaseresnet18wgrl()
   # mynet = getresnet18()
   mynet = mynet.cuda()
 

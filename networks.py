@@ -3,6 +3,7 @@ from utils import Hook, nested_children
 from models.myresnet import myresnet18
 from models.baseresnet import baseresnet18
 from models.metricresnet import metricresnet18, metricpathcnet
+from models.baseresnetwgrl import bbaseresnet18wgrl
 import torch
 import torch.nn as nn
 
@@ -22,14 +23,19 @@ def getmetricresnet18():
   resnet18 = metricresnet18(pretrained=False, num_classes=2)
   return resnet18
 
+def getbaseresnet18wgrl():
+  resnet18 = bbaseresnet18wgrl()
+  return resnet18
+
 def getpatchnetresnet18():
   resnet18 = metricpathcnet()
   return resnet18
 
 def debugmode():
   rinput = torch.randn((1, 3, 256, 256))
-  mynet = getbaseresnet18(numclasses=11)
+  #mynet = getbaseresnet18(numclasses=11)
   # mynet = getmetricresnet18()
+  mynet = getbaseresnet18wgrl()
   print (mynet)
   forwardhook = []
   for l in nested_children(mynet):

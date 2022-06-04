@@ -60,6 +60,7 @@ class lmdbDatasetwmixup(tdata.Dataset):
     self.mydatum = mydatum_pb2.myDatum()
     self._init_db()
     self.len = self.env.stat()["entries"]
+    self.uuid = {}
 
   def _init_db(self):
     self.env = lmdb.open(self.db_path,
@@ -116,7 +117,14 @@ class lmdbDatasetwmixup(tdata.Dataset):
   def __getitem__(self, index):
     img, label, imgpath = self.getitem(index)
     rimg, rlabel, rimgpath = self.getpairitem(index, label)
+    strtoken = imgpath.split("/")
+    strrtoken = rimgpath.split("/")
+    if strtoken[5] not in self.uuid.keys():
+      self.uuid[strtoken[5]] = len(self.uuid.keys())
+    if strrtoken[5] not in self.uuid.keys():
+      self.uuid[strrtoken[5]] = len(self.uuid.keys())
 
+    #print (strtoken[5], strrtoken[5], self.uuid[strtoken[5]], self.uuid[strrtoken[5]])
     if self.transform is not None:
       img = self.transform(img)
       rimg = self.transform(rimg)
@@ -129,7 +137,7 @@ class lmdbDatasetwmixup(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    return img, label, imgpath, rimg, lam
+    return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
 
 if __name__ == '__main__':
 
@@ -139,7 +147,7 @@ if __name__ == '__main__':
                           T.ToTensor()])  # 0 to 1
 
   #mydataset = lmdbDataset("/home/user/work_db/v220401_01/Train_v220401_01_CelebA_LDRGB_LD3007_1by1_260x260.db", transforms)
-  mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Test_Protocal_4C3_OULU_1by1_260x260.db/",
+  mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260.db/",
                           transforms)
   trainloader = DataLoader(mydataset, batch_size=10, shuffle=True, num_workers=0, pin_memory=False)
   for imgp1, label, imgpath, rimg, lam in trainloader:
