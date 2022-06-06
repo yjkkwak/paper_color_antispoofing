@@ -96,8 +96,12 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   totaliter = len(trainloader)
   regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
   probsm = nn.Softmax(dim=1)
-  for index, (images, labels, imgpath, rimg, rlab, uid1, uid2) in enumerate(trainloader):
+  for index, (tmpimages, tmplabels, imgpath, rimg, rlab, tmpuid1, tmpuid2) in enumerate(trainloader):
     fbtimer.tic()
+    rand_idx = torch.randperm(rimg.shape[0])
+    images = torch.cat((tmpimages, rimg[rand_idx[0:rimg.shape[0] // 2],]), dim=0)
+    labels = torch.cat((tmplabels, rlab[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
+    uid1 = torch.cat((tmpuid1, tmpuid2[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
     labels = labels.type(torch.FloatTensor)
     images, labels = images.cuda(), labels.cuda()
     uid1 = uid1.cuda()
@@ -111,7 +115,7 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
-    acc = accuracy(tmplogit, labels)
+    acc = accuracy(tmplogit[0:tmpimages.shape[0],:], labels[0:tmplabels.shape[0]])
     loss.backward()
     optimizer.step()
     averagemetermap["loss_am"].update(loss.item())

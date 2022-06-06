@@ -98,7 +98,7 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   probsm = nn.Softmax(dim=1)
   for index, (images, labels, imgpath) in enumerate(testloader):
     images, labels = images.cuda(), labels.cuda()
-    logit = model(images)
+    logit, dislogit = model(images)
     prob = probsm(logit)
     expectprob = torch.sum(regrsteps * prob, dim=1)
     tmplogit = torch.zeros(images.size(0), 2).cuda()
