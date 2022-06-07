@@ -31,16 +31,16 @@ random.seed(random_seed)
 
 parser = argparse.ArgumentParser(description='anti-spoofing training')
 parser.add_argument('--lmdbpath', type=str,
-                    default='/home/user/work_db/v220419_01/Train_v220419_01_CelebA_LDRGB_LD3007_1by1_260x260.db', help='db path')
+                    default='/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260.db', help='db path')
 parser.add_argument('--ckptpath', type=str,
-                    default='/home/user/model_2022/v220419_01', help='ckpt path')
+                    default='/home/user/model_2022/test', help='ckpt path')
 parser.add_argument('--epochs', type=int, default=80, help='num of epochs')
-parser.add_argument('--batch_size', type=int, default=512, help='batch_size')
+parser.add_argument('--batch_size', type=int, default=16, help='batch_size')
 parser.add_argument('--GPU', type=int, default=0, help='specify which gpu to use')
 parser.add_argument('--works', type=int, default=4, help='works')
-parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate')
 parser.add_argument('--gamma', type=float, default=0.97, help='gamma for scheduler')
-parser.add_argument('--opt', type=str, default='sgd', help='sgd or adam')
+parser.add_argument('--opt', type=str, default='adam', help='sgd or adam')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum for scheduler')
 parser.add_argument('--meta', type=str, default='meta', help='meta')
 parser.add_argument('--resume', type=str, default='', help='resume path')
@@ -134,6 +134,8 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
       logger.print (strprint)
 
 
+
+
 def trainmodel():
   """
   """
@@ -179,18 +181,20 @@ def trainmodel():
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     startepoch = checkpoint['epoch'] + 1
 
-
+  besthter = 100.0
   for epoch in range(startepoch, args.epochs):
     mynet.train()
     epochtimer.tic()
     trainepoch(epoch, trainloader, mynet, criterion, optimizer, averagemetermap)
     epochtimer.toc()
-    strprint = "{}/{} loss:{:.5f} acc:{:.5f} lr:{:.5f} time:{:.5f}".format(epoch, args.epochs, averagemetermap["loss_am"].avg, averagemetermap["acc_am"].avg, optimizer.param_groups[0]['lr'], epochtimer.average_time)
+    strprint = "{}/{} loss:{:.5f} acc:{:.5f} lr:{:.8f} time:{:.5f}".format(epoch, args.epochs, averagemetermap["loss_am"].avg, averagemetermap["acc_am"].avg, optimizer.param_groups[0]['lr'], epochtimer.average_time)
     logger.print (strprint)
     scheduler.step()
-    save_ckpt(epoch, mynet, optimizer)
-    if epoch > 5:
-      testmodel(epoch, mynet, testdbpath, strckptpath)
+    if epoch > 50 and averagemetermap["acc_am"].avg > 99.0:
+      hter = testmodel(epoch, mynet, testdbpath, strckptpath)
+      if besthter > hter:
+        besthter = hter
+        save_ckpt(epoch, mynet, optimizer)
 
 
 if __name__ == '__main__':

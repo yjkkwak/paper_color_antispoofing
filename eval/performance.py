@@ -56,7 +56,7 @@ def ssan_performances_val(score_val_filename):
   the_file = open(strevalpath, "w")
   the_file.close()
 
-  return val_ACC, fpr[right_index], FRR[right_index], HTER[right_index], auc_test, best_thr
+  return HTER[right_index]
 
 
 def get_err_threhold(fpr, tpr, threshold):

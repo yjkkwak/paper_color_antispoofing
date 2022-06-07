@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from eval.performance import ssan_performances_val
 
 from networks import getbaseresnet18, getmetricresnet18
-from lmdbdataset import lmdbDataset
+from lmdbdataset import lmdbDataset, lmdbDatasettest
 from utils import AverageMeter, accuracy, getbasenamewoext, genfarfrreer, gentprwonlylive
 import os
 import shortuuid
@@ -86,7 +86,7 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   transforms = T.Compose([T.CenterCrop((256, 256)),
                           T.ToTensor()])  # 0 to 1
 
-  testdataset = lmdbDataset(testdbpath, transforms)
+  testdataset = lmdbDatasettest(testdbpath, transforms)
 
   # print(testdataset)
   testloader = DataLoader(testdataset, batch_size=256, shuffle=False, num_workers=0, pin_memory=True)
@@ -96,14 +96,24 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   writelist = []
   regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
   probsm = nn.Softmax(dim=1)
-  for index, (images, labels, imgpath) in enumerate(testloader):
+  for index, outitem in enumerate(testloader):
+    images = outitem["imgs"]
+    labels = outitem["label"]
+    imgpath = outitem["imgpath"]
     images, labels = images.cuda(), labels.cuda()
-    logit, dislogit = model(images)
-    prob = probsm(logit)
-    expectprob = torch.sum(regrsteps * prob, dim=1)
+    # b f c w h
+    map_score = 0
+    for subi in range(images.shape[1]):
+      logit, dislogit = model(images[:, subi, :, :, :])
+      prob = probsm(logit)
+      expectprob = torch.sum(regrsteps * prob, dim=1)
+      map_score += expectprob.detach().cpu().numpy()
+    map_score = map_score / images.shape[1]
+
     tmplogit = torch.zeros(images.size(0), 2).cuda()
-    tmplogit[:, 1] = expectprob
+    tmplogit[:, 1] = torch.from_numpy(map_score)
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
+
     acc = accuracy(tmplogit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
@@ -114,7 +124,8 @@ def testmodel(epoch, model, testdbpath, strckptpath):
     the_file.write(witem)
   the_file.close()
 
-  ssan_performances_val(strscorepath)
+  hter = ssan_performances_val(strscorepath)
+  return hter
 
 
 def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
