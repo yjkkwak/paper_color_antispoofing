@@ -7,16 +7,16 @@ import argparse
 from torchvision import transforms as T
 from torchvision import models
 from torch.utils.data import DataLoader
-from augs.cutmix import cutmix_data
+from augs.cutmix import cutmix_data, mixup_criterion
 
 
-from networks import getresnet18, getbaseresnet18, getbaseresnet18wgrl
+from networks import getbasesiameseresnet18wgrl
 from lmdbdataset import lmdbDatasetwmixup
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
 import shortuuid
 from datetime import datetime
-from test import testmodel
+from test import testmodel, testsiamesemodel
 from shutil import copyfile
 import glob
 
@@ -99,26 +99,42 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
   for index, (tmpimages, tmplabels, imgpath, rimg, rlab, tmpuid1, tmpuid2) in enumerate(trainloader):
     fbtimer.tic()
     rand_idx = torch.randperm(rimg.shape[0])
-    # images = torch.cat((tmpimages, rimg[rand_idx[0:rimg.shape[0] // 4],]), dim=0)
-    # labels = torch.cat((tmplabels, rlab[rand_idx[0:rimg.shape[0] // 4]]), dim=0)
-    # uid1 = torch.cat((tmpuid1, tmpuid2[rand_idx[0:rimg.shape[0] // 4]]), dim=0)
-    # images = torch.cat((tmpimages, rimg[rand_idx[0:rimg.shape[0] // 2],]), dim=0)
-    # labels = torch.cat((tmplabels, rlab[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
-    # uid1 = torch.cat((tmpuid1, tmpuid2[rand_idx[0:rimg.shape[0] // 2]]), dim=0)
     images = torch.cat((tmpimages, rimg[rand_idx,]), dim=0)
     labels = torch.cat((tmplabels, rlab[rand_idx]), dim=0)
     uid1 = torch.cat((tmpuid1, tmpuid2[rand_idx]), dim=0)
     labels = labels.type(torch.FloatTensor)
 
+    ### reg mix
     images, labels = images.cuda(), labels.cuda()
     uid1 = uid1.cuda()
+
+    ### mixup
+    miximages, mixlabels = tmpimages.clone().cuda(), tmplabels.clone().cuda()
+    mixuid1 = tmpuid1.clone().cuda()
+    miximages, mixlabels = cutmix_data(miximages, mixlabels)
+    ###
+
     optimizer.zero_grad()
-    logit, dislogit = model(images)
-    prob = probsm(logit)
+    #print(images.shape, miximages.shape)
+    logit_reg, logit_cls, dislogit_reg, dislogit_cls = model(images, miximages)
+    #print(logit_reg.shape, logit_cls.shape, dislogit_reg.shape, dislogit_cls.shape)
+
+    ###
+    prob = probsm(logit_reg)
     expectprob = torch.sum(regrsteps * prob, dim=1)
+    #print (expectprob.shape, labels.shape)
     mseloss = criterion["mse"](expectprob, labels)
-    advclsloss = criterion["cls"](dislogit, uid1)
-    loss = mseloss + advclsloss
+    advregloss = criterion["cls"](dislogit_reg, uid1)
+    ###
+
+
+    #
+    mixuploss = mixup_criterion(criterion["cls"], logit_cls, mixlabels[0], mixlabels[1], mixlabels[2]).mean()
+    advmixuploss = criterion["cls"](dislogit_cls, mixuid1)
+    #
+
+    loss = mseloss + advregloss + mixuploss + advmixuploss
+
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
@@ -151,8 +167,7 @@ def trainmodel():
   averagemetermap["acc_am"] = AverageMeter()
   epochtimer = Timer()
 
-  mynet = getbaseresnet18wgrl(numclasses=11)
-  # mynet = getresnet1s8()
+  mynet = getbasesiameseresnet18wgrl()
   mynet = mynet.cuda()
 
   transforms = T.Compose([T.RandomCrop((256, 256)),
@@ -198,7 +213,7 @@ def trainmodel():
     logger.print (strprint)
     scheduler.step()
     if averagemetermap["acc_am"].avg > 93.0:#98
-      hter = testmodel(epoch, mynet, testdbpath, strckptpath)
+      hter = testsiamesemodel(epoch, mynet, testdbpath, strckptpath)
       if besthter > hter:
         besthter = hter
         save_ckpt(epoch, mynet, optimizer)

@@ -3,7 +3,7 @@ from utils import Hook, nested_children
 from models.myresnet import myresnet18
 from models.baseresnet import baseresnet18
 from models.metricresnet import metricresnet18, metricpathcnet
-from models.baseresnetwgrl import bbaseresnet18wgrl
+from models.baseresnetwgrl import bbaseresnet18wgrl, bbasesiameseresnet18wgrl
 import torch
 import torch.nn as nn
 
@@ -23,8 +23,12 @@ def getmetricresnet18():
   resnet18 = metricresnet18(pretrained=False, num_classes=2)
   return resnet18
 
-def getbaseresnet18wgrl():
-  resnet18 = bbaseresnet18wgrl()
+def getbaseresnet18wgrl(numclasses=11):
+  resnet18 = bbaseresnet18wgrl(numclasses)
+  return resnet18
+
+def getbasesiameseresnet18wgrl():
+  resnet18 = bbasesiameseresnet18wgrl()
   return resnet18
 
 def getpatchnetresnet18():

@@ -123,15 +123,15 @@ def writedatumtolmdb():
   for strline in strtmplines:
     strline = strline.strip()
     strlines.append(strline)
-
-  random.shuffle(strlines)
+  strlines.sort()
+  #random.shuffle(strlines)
   batch_size = 3000
   batches = int(len(strlines) / batch_size)
   print (batches)
 
   listname = getbasenamewoext(os.path.basename(args.listpath))
-  dbname = "{}_{}.db".format(listname, args.patchtype)
-  usedpathname = "{}_{}.db.path".format(listname, args.patchtype)
+  dbname = "{}_{}.db.sort".format(listname, args.patchtype)
+  usedpathname = "{}_{}.db.sort.path".format(listname, args.patchtype)
 
   lmdbpath = os.path.join(args.dbpath, "{}".format(dbname))
   usedimagepath = os.path.join(args.dbpath, "{}".format(usedpathname))

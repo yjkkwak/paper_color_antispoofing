@@ -78,9 +78,9 @@ class Feature_Embedder_ResNet18(nn.Module):
 
 
 class Classifier(nn.Module):
-  def __init__(self):
+  def __init__(self, numclasses):
     super(Classifier, self).__init__()
-    self.classifier_layer = nn.Linear(512, 11)
+    self.classifier_layer = nn.Linear(512, numclasses)
     self.classifier_layer.weight.data.normal_(0, 0.01)
     self.classifier_layer.bias.data.fill_(0.0)
 
@@ -118,13 +118,13 @@ class Discriminator(nn.Module):
 
 
 class DG_model(nn.Module):
-  def __init__(self):
+  def __init__(self, numclasses):
     super(DG_model, self).__init__()
 
     self.backbone = Feature_Generator_ResNet18()
     self.embedder = Feature_Embedder_ResNet18()
 
-    self.classifier = Classifier()
+    self.classifier = Classifier(numclasses)
     self.dis = Discriminator()
 
   def forward(self, input):
@@ -135,12 +135,46 @@ class DG_model(nn.Module):
     #return classifier_out, feature
     return classifier_out, dis_invariant
 
-def bbaseresnet18wgrl():
-  model = DG_model()
+
+class DDG_model(nn.Module):
+  def __init__(self):
+    super(DDG_model, self).__init__()
+
+    self.backbone = Feature_Generator_ResNet18()
+    self.embedder = Feature_Embedder_ResNet18()
+
+    self.classifier_cls = Classifier(2)
+    self.classifier_reg = Classifier(11)
+    self.dis_cls = Discriminator()
+    self.dis_reg = Discriminator()
+
+  def backbone_forward(self, inputreg, inputcls):
+    featurereg = self.embedder(self.backbone(inputreg))
+    featurecls = self.embedder(self.backbone(inputcls))
+    return featurereg, featurecls
+
+
+  def forward(self, inputreg, inputcls):
+    featurereg, featurecls = self.backbone_forward(inputreg, inputcls)
+
+    classifier_reg_out = self.classifier_reg(featurereg)
+    classifier_cls_out = self.classifier_cls(featurecls)
+    dis_reg_invariant = self.dis_cls(featurereg)
+    dis_cls_invariant = self.dis_cls(featurecls)
+    #return classifier_out, feature
+    return classifier_reg_out, classifier_cls_out, dis_reg_invariant, dis_cls_invariant,
+
+def bbaseresnet18wgrl(numclasses):
+  model = DG_model(numclasses)
+  return model
+
+def bbasesiameseresnet18wgrl():
+  model = DDG_model()
   return model
 
 if __name__ == '__main__':
-  x = torch.ones(1, 3, 256, 256)
-  model = DG_model()
-  y, y1= model(x)
-  print (y.shape, y1.shape)
+  x1 = torch.ones(2, 3, 256, 256)
+  x2 = torch.ones(4, 3, 256, 256)
+  model = DDG_model()
+  cls, reg, dis_cls, dis_reg = model(x1, x2)
+  print (cls.shape, reg.shape, dis_cls.shape, dis_reg.shape)

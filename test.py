@@ -74,7 +74,7 @@ def testmetricmodel(epoch, model, testdbpath, strckptpath):
 def testmodel(epoch, model, testdbpath, strckptpath):
   """
   """
-  # print ("test db {} based on {}".format(testdbpath, strckptpath))
+  print ("test db {} based on {}".format(testdbpath, strckptpath))
   averagemetermap = {}
   averagemetermap["acc_am"] = AverageMeter()
 
@@ -105,6 +105,8 @@ def testmodel(epoch, model, testdbpath, strckptpath):
     map_score = 0
     for subi in range(images.shape[1]):
       logit, dislogit = model(images[:, subi, :, :, :])
+      # expectprob = probsm(logit)
+      # map_score += expectprob.detach().cpu().numpy()[:, 1]
       prob = probsm(logit)
       expectprob = torch.sum(regrsteps * prob, dim=1)
       map_score += expectprob.detach().cpu().numpy()
@@ -127,6 +129,91 @@ def testmodel(epoch, model, testdbpath, strckptpath):
   hter = ssan_performances_val(strscorepath)
   return hter
 
+
+
+def testsiamesemodel(epoch, model, testdbpath, strckptpath):
+  """
+  """
+  print ("test db {} based on {}".format(testdbpath, strckptpath))
+  averagemetermap = {}
+  averagemetermap["acc_am"] = AverageMeter()
+
+  strscorebasepath = os.path.join(strckptpath, getbasenamewoext(os.path.basename(testdbpath)))
+  if os.path.exists(strscorebasepath) == False:
+    os.makedirs(strscorebasepath)
+  strscorepathreg = "{}/{:02d}.score.reg".format(strscorebasepath, epoch)
+  strscorepathcls = "{}/{:02d}.score.cls".format(strscorebasepath, epoch)
+  the_file_reg = open(strscorepathreg, "w")
+  the_file_cls = open(strscorepathcls, "w")
+  transforms = T.Compose([T.CenterCrop((256, 256)),
+                          T.ToTensor()])  # 0 to 1
+
+  testdataset = lmdbDatasettest(testdbpath, transforms)
+
+  # print(testdataset)
+  testloader = DataLoader(testdataset, batch_size=128, shuffle=False, num_workers=0, pin_memory=True)
+
+  model.eval()
+
+  writelist_reg = []
+  writelist_cls = []
+  regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
+  probsm = nn.Softmax(dim=1)
+  for index, outitem in enumerate(testloader):
+    images = outitem["imgs"]
+    labels = outitem["label"]
+    imgpath = outitem["imgpath"]
+    images, labels = images.cuda(), labels.cuda()
+    # b f c w h
+    map_score_cls = 0
+    map_score_reg = 0
+    for subi in range(images.shape[1]):
+      logit_reg, logit_cls, dislogit_reg, dislogit_cls = model(images[:, subi, :, :, :], images[:, subi, :, :, :])
+
+      # cls
+      expectprob = probsm(logit_cls)
+      map_score_cls += expectprob.detach().cpu().numpy()[:, 1]
+      # reg
+      prob = probsm(logit_reg)
+      expectprob = torch.sum(regrsteps * prob, dim=1)
+      map_score_reg += expectprob.detach().cpu().numpy()
+    map_score_cls = map_score_cls / images.shape[1]
+    map_score_reg = map_score_reg / images.shape[1]
+
+    tmplogit_cls = torch.zeros(images.size(0), 2).cuda()
+    tmplogit_cls[:, 1] = torch.from_numpy(map_score_cls)
+    tmplogit_cls[:, 0] = 1.0 - tmplogit_cls[:, 1]
+
+    tmplogit_reg = torch.zeros(images.size(0), 2).cuda()
+    tmplogit_reg[:, 1] = torch.from_numpy(map_score_reg)
+    tmplogit_reg[:, 0] = 1.0 - tmplogit_reg[:, 1]
+
+    acc = accuracy(tmplogit_reg, labels)
+    averagemetermap["acc_am"].update(acc[0].item())
+    for idx, imgpathitem in enumerate(imgpath):
+      writelist_cls.append(
+        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(tmplogit_cls[idx][0]),
+                                        float(tmplogit_cls[idx][1])))
+      writelist_reg.append(
+        "{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(tmplogit_reg[idx][0]),
+                                        float(tmplogit_reg[idx][1])))
+
+
+  for witem in writelist_cls:
+    the_file_cls.write(witem)
+  the_file_cls.close()
+
+  for witem in writelist_reg:
+    the_file_reg.write(witem)
+  the_file_reg.close()
+
+  htercls = ssan_performances_val(strscorepathcls)#4
+  hter = ssan_performances_val(strscorepathreg)#5
+
+  if htercls < hter:
+    hter = htercls
+
+  return hter
 
 def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
   """

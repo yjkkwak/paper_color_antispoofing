@@ -59,7 +59,8 @@ class lmdbDataset(tdata.Dataset):
     strkey = self.videokeys[reindex]
     listofindex = self.videopath[strkey]
 
-    index = np.random.randint(0, len(listofindex))
+    ridx = np.random.randint(0, len(listofindex))
+    index = listofindex[ridx]
 
     strid = "{:08}".format(index)
     lmdb_data = self.txn.get(strid.encode("ascii"))
@@ -90,6 +91,7 @@ class lmdbDatasettest(tdata.Dataset):
     self.db_path = db_path
     self.db_path_img = "{}{}".format(self.db_path, ".path")
     self.videopath = {}
+    self.videopath2 = {}
     self.videokeys = []
     self.setsinglevideo()
     self.mydatum = mydatum_pb2.myDatum()
@@ -122,6 +124,11 @@ class lmdbDatasettest(tdata.Dataset):
         strkey = os.path.dirname(strline)
         self.setkeys(strkey, index)
     self.videokeys = list(self.videopath.keys())
+    # for kk in self.videokeys:
+    #   print (kk)
+    #   for vvv in self.videopath[kk]:
+    #     print (vvv)
+    #   break
 
   def __len__(self):
     return len(self.videokeys)
@@ -146,6 +153,7 @@ class lmdbDatasettest(tdata.Dataset):
       img = Image.fromarray(dst)
       label = self.mydatum.label
       imgpath = self.mydatum.path
+      #print (index, imgpath)
       strtoken = imgpath.split("/")
       if strtoken[5] not in self.uuid.keys():
         self.uuid[strtoken[5]] = len(self.uuid.keys())
@@ -192,6 +200,7 @@ class lmdbDatasetwmixup(tdata.Dataset):
   def setsinglevideo(self):
     fpath = open(self.db_path_img, "r")
     strlines = fpath.readlines()
+
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
@@ -201,13 +210,7 @@ class lmdbDatasetwmixup(tdata.Dataset):
       elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
         strkey = os.path.dirname(strline)
         self.setkeys(strkey, index)
-    #self.videokeys = list(self.videopath.keys())
-    self.videokeys = []
-    self.videokeys.extend(list(self.videopath.keys()))
-    self.videokeys.extend(list(self.videopath.keys()))
-    self.videokeys.extend(list(self.videopath.keys()))
-    self.videokeys.extend(list(self.videopath.keys()))
-    self.videokeys.extend(list(self.videopath.keys()))
+    self.videokeys = list(self.videopath.keys())
 
   def __len__(self):
     return len(self.videokeys)
@@ -247,13 +250,16 @@ class lmdbDatasetwmixup(tdata.Dataset):
     revideoindex = np.random.randint(0, self.len)
     strkey = self.videokeys[revideoindex]
     listofindex = self.videopath[strkey]
-    rindex = np.random.randint(0, len(listofindex))
+
+    ridx = np.random.randint(0, len(listofindex))
+    rindex = listofindex[ridx]
 
     while(videoindex == revideoindex):
       revideoindex = np.random.randint(0, self.len)
       strkey = self.videokeys[revideoindex]
       listofindex = self.videopath[strkey]
-      rindex = np.random.randint(0, len(listofindex))
+      ridx = np.random.randint(0, len(listofindex))
+      rindex = listofindex[ridx]
 
     rimg, rlabel, rimgpath = self.getitem(rindex)
 
@@ -261,7 +267,8 @@ class lmdbDatasetwmixup(tdata.Dataset):
       revideoindex = np.random.randint(0, self.len)
       strkey = self.videokeys[revideoindex]
       listofindex = self.videopath[strkey]
-      rindex = np.random.randint(0, len(listofindex))
+      ridx = np.random.randint(0, len(listofindex))
+      rindex = listofindex[ridx]
 
       rimg, rlabel, rimgpath = self.getitem(rindex)
 
@@ -270,7 +277,8 @@ class lmdbDatasetwmixup(tdata.Dataset):
   def __getitem__(self, reindex):
     strkey = self.videokeys[reindex]
     listofindex = self.videopath[strkey]
-    index = np.random.randint(0, len(listofindex))
+    ridx = np.random.randint(0, len(listofindex))
+    index = listofindex[ridx]
 
     img, label, imgpath = self.getitem(index)
     rimg, rlabel, rimgpath = self.getpairitem(reindex, label)
@@ -304,14 +312,15 @@ if __name__ == '__main__':
                           T.RandomCrop((256, 256)),
                           T.ToTensor()])  # 0 to 1
 
-  # mydataset = lmdbDatasettest("/home/user/work_db/v4C3/Test_Protocal_4C3_OULU_1by1_260x260.db", transforms)
-  mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260.db",
-                          transforms)
+  mydataset = lmdbDatasettest("/home/user/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db.sort", transforms)
+  # mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260.db",
+  #                         transforms)
   trainloader = DataLoader(mydataset, batch_size=2, shuffle=True, num_workers=0, pin_memory=False)
-  for imgp1, label, imgpath, rimg, lam, uid1, uid2 in trainloader:
-  # for imgmap in trainloader:
-  #   imgs = imgmap["imgs"]
-  #   print (imgs.shape)
+  # for imgp1, label, imgpath, rimg, lam, uid1, uid2 in trainloader:
+  for imgmap in trainloader:
+    imgs = imgmap["imgs"]
+    print (imgs.shape)
+    break
   #   for sid in range(imgs.shape[1]):
   #     print(sid, imgs[0,sid,:,:,:].shape)
   #     print(sid, imgs[0, sid, :, :, :].flatten()[0:10])
