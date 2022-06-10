@@ -34,3 +34,10 @@ def cutmix_data(x, y, beta=1.0, half=False):
   y = (y, y[rand_index], (torch.ones(batch_size) * lam).cuda())
 
   return x, y
+
+def cutout(x, beta=0.4):
+  lam = np.random.beta(beta, beta)
+  bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), 1 - lam)
+  zerostensor = torch.ones_like(x)
+  x[:, :, bbx1:bbx2, bby1:bby2] = zerostensor[:, :, bbx1:bbx2, bby1:bby2]
+  return x

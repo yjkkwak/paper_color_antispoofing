@@ -20,7 +20,8 @@ from test import testmodel, testsiamesemodel
 from shutil import copyfile
 import glob
 
-random_seed = 20220406
+#random_seed = 20220406
+random_seed = 20220610
 torch.manual_seed(random_seed)
 torch.cuda.manual_seed(random_seed)
 torch.cuda.manual_seed_all(random_seed) # if use multi-GPU
