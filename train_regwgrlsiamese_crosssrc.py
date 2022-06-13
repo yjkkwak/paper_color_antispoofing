@@ -11,7 +11,7 @@ from augs.cutmix import cutmix_data, mixup_criterion
 
 
 from networks import getbasesiameseresnet18wgrl
-from lmdbdataset import lmdbDatasetwmixup
+from lmdbdataset import lmdbDatasetwmixupwlimit2
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
 import shortuuid
@@ -37,7 +37,7 @@ parser.add_argument('--opt', type=str, default='adam', help='sgd or adam')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum for scheduler')
 parser.add_argument('--meta', type=str, default='meta', help='meta')
 parser.add_argument('--resume', type=str, default='', help='resume path')
-parser.add_argument('--random_seed', type=int, default=20220612, help='random_seed')
+parser.add_argument('--random_seed', type=int, default=20220408, help='random_seed')
 
 args = parser.parse_args()
 
@@ -75,15 +75,15 @@ logger = Logger(strlogpath)
 logger.print(args)
 
 dbprefix = "/home/user/work_db/v4C3"
+##CASIA-MFSD REPLAY-ATTACK
 
-if "CASIA_MSU_OULU" in args.lmdbpath:
+if args.GPU < 2:
+  strinclude = "CASIA-MFSD"
   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db.sort")
-elif "CASIA_MSU_REPLAY" in args.lmdbpath:
-  testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_OULU_1by1_260x260.db.sort")
-elif "CASIA_OULU_REPLAY" in args.lmdbpath:
-  testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_MSU_1by1_260x260.db.sort")
-elif "MSU_OULU_REPLAY" in args.lmdbpath:
+else:
+  strinclude = "REPLAY-ATTACK"
   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_CASIA_1by1_260x260.db.sort")
+
 
 def save_ckpt(epoch, net, optimizer):
   if os.path.exists(strckptpath) == False:
@@ -180,7 +180,7 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDatasetwmixup(args.lmdbpath, transforms)
+  traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)
@@ -209,7 +209,8 @@ def trainmodel():
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     startepoch = checkpoint['epoch'] + 1
 
-  besthter = 100.0
+  besthter1 = 100.0
+  besthter2 = 100.0
   for epoch in range(startepoch, args.epochs):
     mynet.train()
     epochtimer.tic()
@@ -218,12 +219,13 @@ def trainmodel():
     strprint = "{}/{} loss:{:.5f} acc:{:.5f} lr:{:.8f} time:{:.5f}".format(epoch, args.epochs, averagemetermap["loss_am"].avg, averagemetermap["acc_am"].avg, optimizer.param_groups[0]['lr'], epochtimer.average_time)
     logger.print (strprint)
     scheduler.step()
-    if averagemetermap["acc_am"].avg > 93.0:#98
-      hter = testsiamesemodel(epoch, mynet, testdbpath, strckptpath, 1)
-      if besthter > hter:
-        besthter = hter
+    if averagemetermap["acc_am"].avg > 95.0:#98
+      hter1 = testsiamesemodel(epoch, mynet, testdbpath, strckptpath, 8)
+      hter1_1 = testsiamesemodel(epoch, mynet, testdbpath, strckptpath, 1)
+      if besthter1 > hter1:
+        besthter1 = hter1
         save_ckpt(epoch, mynet, optimizer)
-        copyfile(strlogpath, "{}/trainlog.txt".format(strckptpath))
+        copyfile(strlogpath, "{}/trainlog_1.txt".format(strckptpath))
 
 
 if __name__ == '__main__':

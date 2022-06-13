@@ -105,11 +105,11 @@ def testmodel(epoch, model, testdbpath, strckptpath):
     map_score = 0
     for subi in range(images.shape[1]):
       logit, dislogit = model(images[:, subi, :, :, :])
-      # expectprob = probsm(logit)
-      # map_score += expectprob.detach().cpu().numpy()[:, 1]
+      expectprob = probsm(logit)
+      map_score += expectprob.detach().cpu().numpy()[:, 1]
       prob = probsm(logit)
-      expectprob = torch.sum(regrsteps * prob, dim=1)
-      map_score += expectprob.detach().cpu().numpy()
+      # expectprob = torch.sum(regrsteps * prob, dim=1)
+      # map_score += expectprob.detach().cpu().numpy()
     map_score = map_score / images.shape[1]
 
     tmplogit = torch.zeros(images.size(0), 2).cuda()
@@ -131,14 +131,14 @@ def testmodel(epoch, model, testdbpath, strckptpath):
 
 
 
-def testsiamesemodel(epoch, model, testdbpath, strckptpath):
+def testsiamesemodel(epoch, model, testdbpath, strckptpath, frames_total=8):
   """
   """
   print ("test db {} based on {}".format(testdbpath, strckptpath))
   averagemetermap = {}
   averagemetermap["acc_am"] = AverageMeter()
 
-  strscorebasepath = os.path.join(strckptpath, getbasenamewoext(os.path.basename(testdbpath)))
+  strscorebasepath = os.path.join(strckptpath, getbasenamewoext(os.path.basename(testdbpath)), str(frames_total))
   if os.path.exists(strscorebasepath) == False:
     os.makedirs(strscorebasepath)
   strscorepathreg = "{}/{:02d}.score.reg".format(strscorebasepath, epoch)
@@ -148,7 +148,7 @@ def testsiamesemodel(epoch, model, testdbpath, strckptpath):
   transforms = T.Compose([T.CenterCrop((256, 256)),
                           T.ToTensor()])  # 0 to 1
 
-  testdataset = lmdbDatasettest(testdbpath, transforms)
+  testdataset = lmdbDatasettest(testdbpath, frames_total, transforms)
 
   # print(testdataset)
   testloader = DataLoader(testdataset, batch_size=128, shuffle=False, num_workers=0, pin_memory=True)

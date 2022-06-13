@@ -6,13 +6,42 @@ def getbasenamewoext(srcfile):
   return pathname
 
 def main():
-  basemeta = "/home/user/work_2022/Paper_AntiSpoofing/meta/script/Protocal_4C3"
-  baselmdb = "/home/user/work_db/v4C3/"
+  #basemeta = "/home/user/work_2022/Paper_AntiSpoofing/meta/script/Protocal_4C3"
+  basemeta = "/home/user/work_2022/Paper_AntiSpoofing/meta/script/OULU_P"
+  baselmdb = "/home/user/work_db/vOP/"
   dblist = [
+            "Test_OULU_Protocol_1.list",
+            "Test_OULU_Protocol_2.list",
+            "Test_OULU_Protocol_3_1.list",
+            "Test_OULU_Protocol_3_2.list",
+            "Test_OULU_Protocol_3_3.list",
+            "Test_OULU_Protocol_3_4.list",
+            "Test_OULU_Protocol_3_5.list",
+            "Test_OULU_Protocol_3_6.list",
+            "Test_OULU_Protocol_4_1.list",
+            "Test_OULU_Protocol_4_2.list",
+            "Test_OULU_Protocol_4_3.list",
+            "Test_OULU_Protocol_4_4.list",
+            "Test_OULU_Protocol_4_5.list",
+            "Test_OULU_Protocol_4_6.list",
+            "Train_OULU_Protocol_1.list",
+            "Train_OULU_Protocol_2.list",
+            "Train_OULU_Protocol_3_1.list",
+            "Train_OULU_Protocol_3_2.list",
+            "Train_OULU_Protocol_3_3.list",
+            "Train_OULU_Protocol_3_4.list",
+            "Train_OULU_Protocol_3_5.list",
+            "Train_OULU_Protocol_3_6.list",
+            "Train_OULU_Protocol_4_1.list",
+            "Train_OULU_Protocol_4_2.list",
+            "Train_OULU_Protocol_4_3.list",
+            "Train_OULU_Protocol_4_4.list",
+            "Train_OULU_Protocol_4_5.list",
+            "Train_OULU_Protocol_4_6.list"
             # "Test_Protocal_4C3_MSU.list",
             # "Test_Protocal_4C3_CASIA.list",
             # "Test_Protocal_4C3_OULU.list",
-            "Test_Protocal_4C3_REPLAY.list",
+            # "Test_Protocal_4C3_REPLAY.list",
             # "Train_Protocal_4C3_CASIA_MSU_OULU.list",
             # "Train_Protocal_4C3_CASIA_MSU_REPLAY.list",
             # "Train_Protocal_4C3_CASIA_OULU_REPLAY.list",
