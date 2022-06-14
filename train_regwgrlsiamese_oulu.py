@@ -175,8 +175,8 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  #traindataset = lmdbDatasetwmixupwlimit_oulu2(args.lmdbpath, strinclude, transforms)
-  traindataset = lmdbDatasetwmixupwlimit_oulu(args.lmdbpath, strinclude, transforms)
+  traindataset = lmdbDatasetwmixupwlimit2_oulu(args.lmdbpath, strinclude, transforms)
+  # traindataset = lmdbDatasetwmixupwlimit_oulu(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)
