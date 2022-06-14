@@ -168,15 +168,15 @@ def trainmodel():
   averagemetermap["acc_am"] = AverageMeter()
   epochtimer = Timer()
 
-  mynet = getbasesiameseresnet18wgrl(numdclasses=5)
+  mynet = getbasesiameseresnet18wgrl(numdclasses=3)
   mynet = mynet.cuda()
 
   transforms = T.Compose([T.RandomCrop((256, 256)),
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDatasetwmixupwlimit2_oulu(args.lmdbpath, strinclude, transforms)
-  # traindataset = lmdbDatasetwmixupwlimit_oulu(args.lmdbpath, strinclude, transforms)
+  # traindataset = lmdbDatasetwmixupwlimit2_oulu(args.lmdbpath, strinclude, transforms)
+  traindataset = lmdbDatasetwmixupwlimit_oulu(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)
@@ -215,7 +215,7 @@ def trainmodel():
     strprint = "{}/{} loss:{:.5f} acc:{:.5f} lr:{:.8f} time:{:.5f}".format(epoch, args.epochs, averagemetermap["loss_am"].avg, averagemetermap["acc_am"].avg, optimizer.param_groups[0]['lr'], epochtimer.average_time)
     logger.print (strprint)
     scheduler.step()
-    if averagemetermap["acc_am"].avg > 95.0:#98
+    if averagemetermap["acc_am"].avg > 90.0:#98
       hter1 = testsiamesemodel(epoch, mynet, testdbpath, strckptpath, 8)
       # hter1_1 = testsiamesemodel(epoch, mynet, testdbpath, strckptpath, 1)
       if besthter1 > hter1:

@@ -12,26 +12,29 @@ def runjobs():
 
   stropti = "adam"
 
-
+  strlr = 0.00001
   strgpu = 0
-  strDB = "Train_OULU_Protocol_4_1_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
-
+  strlr = 0.00005
   strgpu = 1
-  strDB = "Train_OULU_Protocol_4_2_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
+  strlr = 0.00001
+  strrandom_seed = 20220408
   strgpu = 2
-  strDB = "Train_OULU_Protocol_4_3_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
+  strlr = 0.00005
   strgpu = 3
   strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed):
-  strmeta = "msegrlloss_resnet18_{}_full_siamese_oulu".format(stropti)
+  strmeta = "msegrlloss_resnet18_{}_full_siamese_oulu_sx3".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
                                                       "MSEADV",

@@ -60,7 +60,9 @@ class lmdbDatasetwmixupwlimit_oulu(tdata.Dataset):
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
-    self.videokeys = list(self.videopath.keys())
+    #self.videokeys = list(self.videopath.keys())
+    self.videokeys = []
+    self.videokeys.extend(3*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)
@@ -139,10 +141,10 @@ class lmdbDatasetwmixupwlimit_oulu(tdata.Dataset):
     # /home/user/work_db/PublicDB/OULU-NPU/test_jpg/spoof/3_1_39_5/3_1_39_5_replay2_0.jpg
     strtoken = strtoken[8].split("_")
     strrtoken = strrtoken[8].split("_")
-    if strtoken[3] not in self.uuid.keys():
-      self.uuid[strtoken[3]] = len(self.uuid.keys())
-    if strrtoken[3] not in self.uuid.keys():
-      self.uuid[strrtoken[3]] = len(self.uuid.keys())
+    if strtoken[1] not in self.uuid.keys():
+      self.uuid[strtoken[1]] = len(self.uuid.keys())
+    if strrtoken[1] not in self.uuid.keys():
+      self.uuid[strrtoken[1]] = len(self.uuid.keys())
 
     #print (strtoken[5], strrtoken[5], self.uuid[strtoken[5]], self.uuid[strrtoken[5]])
     if self.transform is not None:
@@ -158,7 +160,7 @@ class lmdbDatasetwmixupwlimit_oulu(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    return img, label, imgpath, rimg, lam, self.uuid[strtoken[3]], self.uuid[strrtoken[3]]
+    return img, label, imgpath, rimg, lam, self.uuid[strtoken[1]], self.uuid[strrtoken[1]]
 
 #############################################################################################################################################
 #############################################################################################################################################
@@ -257,13 +259,15 @@ class lmdbDatasetwmixupwlimit2_oulu(tdata.Dataset):
     strrtoken = rimgpath.split("/")
     # oulu real or else (fakes)
     # /home/user/work_db/PublicDB/OULU-NPU/test_jpg/spoof/3_1_39_5/3_1_39_5_replay2_0.jpg
+
     strtoken = strtoken[8].split("_")
     strrtoken = strrtoken[8].split("_")
+    #print(strtoken)
 
-    if strtoken[3] not in self.uuid.keys():
-      self.uuid[strtoken[3]] = len(self.uuid.keys())
-    if strrtoken[3] not in self.uuid.keys():
-      self.uuid[strrtoken[3]] = len(self.uuid.keys())
+    if strtoken[1] not in self.uuid.keys():
+      self.uuid[strtoken[1]] = len(self.uuid.keys())
+    if strrtoken[1] not in self.uuid.keys():
+      self.uuid[strrtoken[1]] = len(self.uuid.keys())
 
     #print (strtoken[5], strrtoken[5], self.uuid[strtoken[5]], self.uuid[strrtoken[5]])
     if self.transform is not None:
@@ -279,7 +283,7 @@ class lmdbDatasetwmixupwlimit2_oulu(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    return img, label, imgpath, rimg, lam, self.uuid[strtoken[3]], self.uuid[strrtoken[3]]
+    return img, label, imgpath, rimg, lam, self.uuid[strtoken[1]], self.uuid[strrtoken[1]]
 #############################################################################################################################################
 #############################################################################################################################################
 if __name__ == '__main__':
