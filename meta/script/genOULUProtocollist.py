@@ -86,6 +86,14 @@ def genprotocol(protocoltype, subptype):
 
 #6_3_48_4
 def main():
+  """
+  Phone (1…6) is the phone ID.
+  Session (1…3) is the session number.
+  User (1…55) is the subject ID. The users from 1 to 20 are used for training, from 21 to 35 for development
+  and 36 to 55 for testing.
+  File (1…5) is the access type, where: 1=real; 2=print1; 3=print2; 4=video-replay1; 5=video-replay2.
+  :return:
+  """
   print ("HI")
   # genlist("Protocal_4C3", datatypes[0], datapaths)
   # genlist("Protocal_4C3", datatypes[1], datapaths)

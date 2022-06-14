@@ -27,8 +27,8 @@ def getbaseresnet18wgrl(numclasses=11):
   resnet18 = bbaseresnet18wgrl(numclasses)
   return resnet18
 
-def getbasesiameseresnet18wgrl():
-  resnet18 = bbasesiameseresnet18wgrl()
+def getbasesiameseresnet18wgrl(numdclasses=3):
+  resnet18 = bbasesiameseresnet18wgrl(numdclasses)
   return resnet18
 
 def getpatchnetresnet18():

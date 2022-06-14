@@ -96,12 +96,12 @@ class Classifier(nn.Module):
 
 
 class Discriminator(nn.Module):
-  def __init__(self):
+  def __init__(self, numdclasses = 3):
     super(Discriminator, self).__init__()
     self.fc1 = nn.Linear(512, 512)
     self.fc1.weight.data.normal_(0, 0.01)
     self.fc1.bias.data.fill_(0.0)
-    self.fc2 = nn.Linear(512, 3)
+    self.fc2 = nn.Linear(512, numdclasses)
     self.fc2.weight.data.normal_(0, 0.3)
     self.fc2.bias.data.fill_(0.0)
     self.ad_net = nn.Sequential(
@@ -137,7 +137,7 @@ class DG_model(nn.Module):
 
 
 class DDG_model(nn.Module):
-  def __init__(self):
+  def __init__(self, numdclasses=3):
     super(DDG_model, self).__init__()
 
     self.backbone = Feature_Generator_ResNet18()
@@ -145,8 +145,8 @@ class DDG_model(nn.Module):
 
     self.classifier_cls = Classifier(2)
     self.classifier_reg = Classifier(11)
-    self.dis_cls = Discriminator()
-    self.dis_reg = Discriminator()
+    self.dis_cls = Discriminator(numdclasses)
+    self.dis_reg = Discriminator(numdclasses)
 
   def backbone_forward(self, inputreg, inputcls):
     featurereg = self.embedder(self.backbone(inputreg))
@@ -168,8 +168,8 @@ def bbaseresnet18wgrl(numclasses):
   model = DG_model(numclasses)
   return model
 
-def bbasesiameseresnet18wgrl():
-  model = DDG_model()
+def bbasesiameseresnet18wgrl(numdclasses):
+  model = DDG_model(numdclasses)
   return model
 
 if __name__ == '__main__':
