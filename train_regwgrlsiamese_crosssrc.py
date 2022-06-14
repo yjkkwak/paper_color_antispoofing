@@ -11,7 +11,7 @@ from augs.cutmix import cutmix_data, mixup_criterion
 
 
 from networks import getbasesiameseresnet18wgrl
-from lmdbdataset import lmdbDatasetwmixupwlimit2
+from lmdbdataset import lmdbDatasetwmixupwlimit
 from utils import AverageMeter, accuracy, Timer, getbasenamewoext, Logger
 import os
 import shortuuid
@@ -77,12 +77,12 @@ logger.print(args)
 dbprefix = "/home/user/work_db/v4C3"
 ##CASIA-MFSD REPLAY-ATTACK
 
-if args.GPU < 2:
-  strinclude = "CASIA-MFSD"
-  testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db.sort")
-else:
-  strinclude = "REPLAY-ATTACK"
-  testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_CASIA_1by1_260x260.db.sort")
+# if args.GPU < 2:
+#   strinclude = "CASIA-MFSD"
+#   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db.sort")
+# else:
+strinclude = "REPLAY-ATTACK"
+testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_CASIA_1by1_260x260.db.sort")
 
 
 def save_ckpt(epoch, net, optimizer):
@@ -180,7 +180,7 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
+  traindataset = lmdbDatasetwmixupwlimit(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)
