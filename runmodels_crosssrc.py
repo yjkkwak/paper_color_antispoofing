@@ -11,32 +11,34 @@ def runjobs():
 
   stropti = "adam"
   #C , sgd
-  strlr = 0.0001
+  strlr = 0.0005
   strrandom_seed = 20220406
   strgpu = 0
   strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
   strlr = 0.0005
+  strrandom_seed = 20220615
   strgpu = 1
   strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
   #R
-  strlr = 0.0001
-  strrandom_seed = 20220408
+  strlr = 0.0005
+  strrandom_seed = 18181818
   strgpu = 2
   strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00005
+  strlr = 0.0005
+  strrandom_seed = 484848484
   strgpu = 3
   strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed):
-  strmeta = "msegrlloss_resnet18_{}_full_siamese_crosssrc_sax5".format(stropti)
+  strmeta = "msegrlloss_resnet18_{}_full_siamese_crosssrc_sax50".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
                                                       "MSEADV",

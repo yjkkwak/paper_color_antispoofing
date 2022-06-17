@@ -157,7 +157,7 @@ def testsiamesemodel(epoch, model, testdbpath, strckptpath, frames_total=8):
 
   writelist_reg = []
   writelist_cls = []
-  regrsteps = torch.linspace(0, 1.0, steps=11).cuda()
+  regrsteps = torch.linspace(0, 1.0, steps=21).cuda()
   probsm = nn.Softmax(dim=1)
   for index, outitem in enumerate(testloader):
     images = outitem["imgs"]

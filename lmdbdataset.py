@@ -360,7 +360,7 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
           self.setkeys(strkey, index)
     #self.videokeys = list(self.videopath.keys())
     self.videokeys = []
-    self.videokeys.extend(5*list(self.videopath.keys()))
+    self.videokeys.extend(50*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)
@@ -434,6 +434,15 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
     rimg, rlabel, rimgpath = self.getpairitem(reindex, label)
     strtoken = imgpath.split("/")
     strrtoken = rimgpath.split("/")
+    #/home/user/work_db/PublicDB/REPLAY-ATTACK/test_jpg/attack/hand/attack_highdef_client104_session01_highdef_video_controlled.mov_34.jpg
+    #/home/user/work_db/PublicDB/REPLAY-ATTACK/test_jpg/attack/hand/attack_mobile_client019_session01_mobile_video_adverse.mov_38.jpg
+    tmpkey1 = 0 # adverse 0
+    tmpkey2 = 0
+    if "controlled" in imgpath:
+      tmpkey1 = 1
+    if "controlled" in rimgpath:
+      tmpkey2 = 1
+
     if strtoken[5] not in self.uuid.keys():
       self.uuid[strtoken[5]] = len(self.uuid.keys())
     if strrtoken[5] not in self.uuid.keys():
@@ -453,7 +462,8 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
+    #return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
+    return img, label, imgpath, rimg, lam, tmpkey1, tmpkey2
 
 #############################################################################################################################################
 #############################################################################################################################################
@@ -579,15 +589,15 @@ if __name__ == '__main__':
                           T.ToTensor()])  # 0 to 1
 
   # mydataset = lmdbDatasettest("/home/user/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db.sort", transforms)
-  mydataset = lmdbDatasetwmixupwlimit("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260.db",
+  mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260.db",
                           transforms)
   trainloader = DataLoader(mydataset, batch_size=100, shuffle=True, num_workers=0, pin_memory=False)
   for imgp1, label, imgpath, rimg, lam, uid1, uid2 in trainloader:
   # for imgmap in trainloader:
   #   imgs = imgmap["imgs"]
-    for iii, fff in enumerate(label):
-      print (fff, imgpath[iii])
-    break
+  #   for iii, fff in enumerate(label):
+  #     print (fff, imgpath[iii])
+  #   break
   #   for sid in range(imgs.shape[1]):
   #     print(sid, imgs[0,sid,:,:,:].shape)
   #     print(sid, imgs[0, sid, :, :, :].flatten()[0:10])
