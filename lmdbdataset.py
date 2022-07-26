@@ -144,6 +144,7 @@ class lmdbDatasettest(tdata.Dataset):
     files_total = len(listofindex)
     interval = files_total // 10
     imgs = torch.zeros((frames_total, 3, 256, 256))
+    # imgpath = ""
     for ii in range(frames_total):
       image_idx = ii * interval + 1
       index = listofindex[image_idx]
@@ -156,6 +157,7 @@ class lmdbDatasettest(tdata.Dataset):
       img = Image.fromarray(dst)
       label = self.mydatum.label
       imgpath = self.mydatum.path
+      # imgpath = "{}_{}".format(imgpath,self.mydatum.path)
       #print (index, imgpath)
       strtoken = imgpath.split("/")
       if strtoken[5] not in self.uuid.keys():
@@ -172,8 +174,49 @@ class lmdbDatasettest(tdata.Dataset):
     outitem["uuid"] = self.uuid[strtoken[5]]
     return outitem
 
-class lmdbDatasetwmixup(tdata.Dataset):
+class lmdbDatasettestAllimages(tdata.Dataset):
   def __init__(self, db_path, transform=None):
+    self.env = None
+    self.txn = None
+    self.transform = transform
+    self.db_path = db_path
+    self.mydatum = mydatum_pb2.myDatum()
+    self._init_db()
+
+
+  def _init_db(self):
+    self.env = lmdb.open(self.db_path,
+                         readonly=True, lock=False,
+                         readahead=False, meminit=False)
+    self.txn = self.env.begin()
+
+  def __len__(self):
+    return self.env.stat()["entries"]
+
+  def __getitem__(self, index):
+    strid = "{:08}".format(index)
+    lmdb_data = self.txn.get(strid.encode("ascii"))
+    self.mydatum.ParseFromString(lmdb_data)
+    dst = np.fromstring(self.mydatum.data, dtype=np.uint8)
+    dst = dst.reshape(self.mydatum.height, self.mydatum.width, self.mydatum.channels)
+    img = Image.fromarray(dst)
+    label = self.mydatum.label
+    imgpath = self.mydatum.path
+
+    if self.transform is not None:
+      img = self.transform(img)
+
+    outitem = {}
+    outitem["imgs"] = img
+    outitem["label"] = label
+    outitem["imgpath"] = imgpath
+    return outitem
+
+
+class lmdbDatasetwmixup(tdata.Dataset):
+  def __init__(self, db_path, transform=None, lk=10):
+    # 11 -1 -> 10
+    self.lk = lk-1
     self.env = None
     self.txn = None
     self.transform = transform
@@ -297,8 +340,8 @@ class lmdbDatasetwmixup(tdata.Dataset):
       img = self.transform(img)
       rimg = self.transform(rimg)
 
-    lam = np.random.randint(1, 10)
-    lam /= 10
+    lam = np.random.randint(1, self.lk)
+    lam /= self.lk
     bbx1, bby1, bbx2, bby2 = self.rand_bbox(img.size(), 1 - lam)
     lam = (bbx2 - bbx1) * (bby2 - bby1) / (img.size()[1] * img.size()[2])
     # print(lam, imgpath, rimgpath)
@@ -349,6 +392,7 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
       strline = strline.strip()
       # ignore  -> limit src
       # if "CASIA-MFSD" in strline: continue
+      # if "OULU-NPU" in strline: continue
       # only contaion -> cross modal
       if self.strinclude in strline:
         if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
@@ -358,9 +402,9 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
-    #self.videokeys = list(self.videopath.keys())
+    # self.videokeys = list(self.videopath.keys())
     self.videokeys = []
-    self.videokeys.extend(50*list(self.videopath.keys()))
+    self.videokeys.extend(55*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)
@@ -436,12 +480,12 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
     strrtoken = rimgpath.split("/")
     #/home/user/work_db/PublicDB/REPLAY-ATTACK/test_jpg/attack/hand/attack_highdef_client104_session01_highdef_video_controlled.mov_34.jpg
     #/home/user/work_db/PublicDB/REPLAY-ATTACK/test_jpg/attack/hand/attack_mobile_client019_session01_mobile_video_adverse.mov_38.jpg
-    tmpkey1 = 0 # adverse 0
-    tmpkey2 = 0
-    if "controlled" in imgpath:
-      tmpkey1 = 1
-    if "controlled" in rimgpath:
-      tmpkey2 = 1
+    # tmpkey1 = 0 # adverse 0
+    # tmpkey2 = 0
+    # if "controlled" in imgpath:
+    #   tmpkey1 = 1
+    # if "controlled" in rimgpath:
+    #   tmpkey2 = 1
 
     if strtoken[5] not in self.uuid.keys():
       self.uuid[strtoken[5]] = len(self.uuid.keys())
@@ -462,8 +506,8 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    #return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
-    return img, label, imgpath, rimg, lam, tmpkey1, tmpkey2
+    return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
+    # return img, label, imgpath, rimg, lam, tmpkey1, tmpkey2
 
 #############################################################################################################################################
 #############################################################################################################################################

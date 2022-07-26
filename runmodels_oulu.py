@@ -1,40 +1,42 @@
 import os
 
 def runjobs():
-  strbaseckpt = "/home/user/model_2022/vOP"
-  strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_regwgrlsiamese_oulu.py"
+  strbaseckpt = "/home/user/model_2022/vOP_onlyreg_abla"
+  #strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_regwgrl_oulu.py"
+  #strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_baseline_oulu.py"
+  #strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_baseline_cutmix_oulu.py"
+  #strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_baseline_cutout_oulu.py"
+  strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_baseline_ls_oulu.py"
 
   strlr = 0.0001
   strgamma = 0.99
-  nepoch = 1000
-  strbsize = 16
+  nepoch = 18
+  strbsize = 64
   strrandom_seed = 20220406
 
   stropti = "adam"
 
-  strlr = 0.00001
   strgpu = 0
-  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_1_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
-  strlr = 0.00005
   strgpu = 1
-  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_2_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00001
-  strrandom_seed = 20220408
   strgpu = 2
-  strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
+  strDB = "Train_OULU_Protocol_4_3_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00005
   strgpu = 3
   strDB = "Train_OULU_Protocol_4_4_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed):
-  strmeta = "msegrlloss_resnet18_{}_full_siamese_oulu_sx3".format(stropti)
+  #strmeta = "msegrlloss_resnet18_{}_full_oulu_sx5".format(stropti)
+  #strmeta = "clsloss_resnet18_{}_full_oulu_sx5_baseline_cutmix".format(stropti)
+  #strmeta = "clsloss_resnet18_{}_full_oulu_sx5_baseline_cutout".format(stropti)
+  strmeta = "clsloss_resnet18_{}_full_oulu_sx5_baseline_ls".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
                                                       "MSEADV",

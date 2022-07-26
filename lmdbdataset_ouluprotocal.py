@@ -60,9 +60,9 @@ class lmdbDatasetwmixupwlimit_oulu(tdata.Dataset):
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
-    #self.videokeys = list(self.videopath.keys())
+    # self.videokeys = list(self.videopath.keys())
     self.videokeys = []
-    self.videokeys.extend(3*list(self.videopath.keys()))
+    self.videokeys.extend(5*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)

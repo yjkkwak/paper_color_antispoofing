@@ -144,8 +144,8 @@ class DDG_model(nn.Module):
     self.embedder = Feature_Embedder_ResNet18()
 
     self.classifier_cls = Classifier(2)
-    self.classifier_reg = Classifier(21)
-    #self.classifier_reg = Classifier(11)
+    # self.classifier_reg = Classifier(21)
+    self.classifier_reg = Classifier(11)
     self.dis_cls = Discriminator(numdclasses)
     self.dis_reg = Discriminator(numdclasses)
 

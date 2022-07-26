@@ -35,6 +35,17 @@ def cutmix_data(x, y, beta=1.0, half=False):
 
   return x, y
 
+def cutmix_data_wocuda(x, y, beta=1.0, half=False):
+  lam = np.random.beta(beta, beta)
+  batch_size = x.size()[0]
+  rand_index = torch.randperm(batch_size)
+  bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), 1 - lam)
+  lam = (bbx2 - bbx1) * (bby2 - bby1) / (x.size()[-1] * x.size()[-2])
+  x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
+  y = (y, y[rand_index], (torch.ones(batch_size) * lam))
+
+  return x, y
+
 def cutout(x, beta=0.4):
   lam = np.random.beta(beta, beta)
   bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), 1 - lam)

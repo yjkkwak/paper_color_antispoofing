@@ -30,8 +30,13 @@ def ssan_performances_val(score_val_filename):
 
   fpr, tpr, threshold = roc_curve(val_labels, val_scores, pos_label=1)
 
+  # print (fpr, tpr, threshold)
+
   auc_test = auc(fpr, tpr)
   val_err, val_threshold, right_index = get_err_threhold(fpr, tpr, threshold)
+
+  # print(right_index)
+
   best_thr = val_threshold
   type1 = len([s for s in data if s['map_score'] < val_threshold and s['label'] == 1])
   type2 = len([s for s in data if s['map_score'] > val_threshold and s['label'] == 0])
@@ -52,9 +57,10 @@ def ssan_performances_val(score_val_filename):
     best_thr)
 
   strevalpath = "{}{}.eval".format(score_val_filename, streval)
-  # print (strevalpath)
+  print (strevalpath)
   the_file = open(strevalpath, "w")
   the_file.close()
+
 
   return HTER[right_index]
 
@@ -140,11 +146,9 @@ def ssdg_performacne_val(score_val_filename):
     try:
       count += 1
       tokens = line.split()
-      label = 0
-      if "/real/" in tokens[2]:
-        label = 1
+      label = float(tokens[0])  # label
 
-      score = float(tokens[1])  # live socre
+      score = float(tokens[2])  # live socre
       prob_list.append(score)
       label_list.append(label)
       data.append({'map_score': score, 'label': label})
@@ -238,7 +242,14 @@ if __name__ == '__main__':
   #   "/home/user/model_2022/v220513_02/Train_v220419_01_CelebA_SiW_LDRGB_LD3007_OULUNPU_1by1_260x260_220525_8LJN426mjCq5E3S6XQxR8C_bsize512_optsgd_lr0.005_gamma_0.92_epochs_81_meta_arcloss163264_w1_1.0_SGD/Dev_v220419_01_OULUNPU_1by1_260x260/78.score")
   # print(acc, fpr, frr, hter, auc, best_thr)
 
-  ssan_performances_val("/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220530_QDVJ3zhtjCMDBRf8SaUR4Y_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/Test_Protocal_4C3_REPLAY_1by1_260x260/01.score")
+  #ssan_performances_val("/home/user/model_2022/v4C3/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220530_QDVJ3zhtjCMDBRf8SaUR4Y_bsize128_optadam_lr0.0001_gamma_0.9_epochs_40_meta_clsloss_resnet18_adam/Test_Protocal_4C3_REPLAY_1by1_260x260/01.score")
+  ssan_performances_val(
+    "/home/user/model_2022/vOP_onlyreg_abla/Train_OULU_Protocol_4_6_1by1_260x260.db_220710_dchWThHnMs6Wz3vJ3aoQu3_bsize16_optadam_lr0.0001_gamma_0.99_epochs_30_meta_clsloss_resnet18_adam_full_oulu_sx5_baseline_seed_20220406/Test_OULU_Protocol_4_6_1by1_260x260.db/00.score")
 
   # cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold = ssdg_performacne_val("/home/user/model_2022/v220513_02/Train_v220419_01_CelebA_SiW_LDRGB_LD3007_OULUNPU_1by1_260x260_220525_8LJN426mjCq5E3S6XQxR8C_bsize512_optsgd_lr0.005_gamma_0.92_epochs_81_meta_arcloss163264_w1_1.0_SGD/Dev_v220419_01_OULUNPU_1by1_260x260/78.score")
+  # print (cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold)
+
+  # cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold = ssdg_performacne_val(
+  #   "/home/user/model_2022/vOP_onlyreg_abla/Train_OULU_Protocol_4_6_1by1_260x260.db_220710_dchWThHnMs6Wz3vJ3aoQu3_bsize16_optadam_lr0.0001_gamma_0.99_epochs_30_meta_clsloss_resnet18_adam_full_oulu_sx5_baseline_seed_20220406/Test_OULU_Protocol_4_6_1by1_260x260.db/00.score")
+  #
   # print (cur_EER_valid, cur_HTER_valid, auc_score, threshold, ACC_threshold)
