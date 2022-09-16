@@ -45,8 +45,12 @@ class lmdbDataset(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
-        strtokens = strline.split(".mov")
-        strkey = "{}.mov".format(strtokens[0])
+        if ".mov" in strline:
+          strtokens = strline.split(".mov")
+          strkey = "{}.mov".format(strtokens[0])
+        else:
+          strtokens = strline.split(".mp4")
+          strkey = "{}.mp4".format(strtokens[0])
         self.setkeys(strkey, index)
       elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
         strkey = os.path.dirname(strline)
@@ -119,8 +123,12 @@ class lmdbDatasettest(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
-        strtokens = strline.split(".mov")
-        strkey = "{}.mov".format(strtokens[0])
+        if ".mov" in strline:
+          strtokens = strline.split(".mov")
+          strkey = "{}.mov".format(strtokens[0])
+        else:
+          strtokens = strline.split(".mp4")
+          strkey = "{}.mp4".format(strtokens[0])
         self.setkeys(strkey, index)
       elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
         strkey = os.path.dirname(strline)
@@ -250,8 +258,12 @@ class lmdbDatasetwmixup(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
-        strtokens = strline.split(".mov")
-        strkey = "{}.mov".format(strtokens[0])
+        if ".mov" in strline:
+          strtokens = strline.split(".mov")
+          strkey = "{}.mov".format(strtokens[0])
+        else:
+          strtokens = strline.split(".mp4")
+          strkey = "{}.mp4".format(strtokens[0])
         self.setkeys(strkey, index)
       elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
         strkey = os.path.dirname(strline)
@@ -349,6 +361,13 @@ class lmdbDatasetwmixup(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
+
+    ### R2
+    # if lam > 0.5:
+    #   lam = 1.0
+    # else:
+    #   lam = 0.0
+    ###
     return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
 
 
@@ -391,20 +410,24 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       # ignore  -> limit src
-      # if "CASIA-MFSD" in strline: continue
-      # if "OULU-NPU" in strline: continue
+      if "CASIA-MFSD" in strline: continue
+      if "OULU-NPU" in strline: continue
       # only contaion -> cross modal
       if self.strinclude in strline:
         if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
-          strtokens = strline.split(".mov")
-          strkey = "{}.mov".format(strtokens[0])
+          if ".mov" in strline:
+            strtokens = strline.split(".mov")
+            strkey = "{}.mov".format(strtokens[0])
+          else:
+            strtokens = strline.split(".mp4")
+            strkey = "{}.mp4".format(strtokens[0])
           self.setkeys(strkey, index)
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
-    # self.videokeys = list(self.videopath.keys())
-    self.videokeys = []
-    self.videokeys.extend(55*list(self.videopath.keys()))
+    self.videokeys = list(self.videopath.keys())
+    # self.videokeys = []
+    # self.videokeys.extend(55*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)

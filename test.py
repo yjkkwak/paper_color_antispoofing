@@ -11,7 +11,7 @@ from torchvision import models
 from torch.utils.data import DataLoader
 from eval.performance import ssan_performances_val
 
-from networks import getbaseresnet18, getmetricresnet18, getbasesiameseresnet18wgrl
+from networks import getbaseresnet18, getmetricresnet18, getbasesiameseresnet18wgrl, getbaseresnet18wgrl
 from lmdbdataset import lmdbDataset, lmdbDatasettest, lmdbDatasettestAllimages
 from utils import AverageMeter, accuracy, getbasenamewoext, genfarfrreer, gentprwonlylive
 import os
@@ -394,7 +394,7 @@ def testsiamesewckpt(model, strckptfilepath, testdbpath, strckptpath, frames_tot
 
   return hter
 
-def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
+def testwckpt(model, strckptfilepath, testdbpath, strckptpath, lk):
   """
   """
   # print ("test db {} based on {}".format(testdbpath, strckptpath))
@@ -404,7 +404,8 @@ def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
   if model is None:
     # model = getmetricresnet18()
     # model = getresnet18()
-    model = getbaseresnet18()
+    #model = getbaseresnet18()
+    model = getbaseresnet18wgrl(numclasses=lk)
     model = model.cuda()
 
   checkpoint = torch.load(strckptfilepath)
@@ -415,36 +416,212 @@ def testwckpt(model, strckptfilepath, testdbpath, strckptpath):
   if os.path.exists(strscorebasepath) == False:
     os.makedirs(strscorebasepath)
   strscorepath = "{}/{:02d}.score".format(strscorebasepath, epoch)
-  if os.path.exists(strscorepath):
-    print ("exists {}".format(strscorepath))
-    return
+  # if os.path.exists(strscorepath):
+  #   print ("exists {}".format(strscorepath))
+  #   return
   the_file = open(strscorepath, "w")
 
   transforms = T.Compose([T.CenterCrop((256, 256)),
                           T.ToTensor()])# 0 to 1
 
-  testdataset = lmdbDataset(testdbpath, transforms)
+  frames_total = 8
+  # testdataset = lmdbDatasettest(testdbpath, transforms)
+  testdataset = lmdbDatasettest(testdbpath, frames_total, transforms)
 
   # print(testdataset)
-  testloader = DataLoader(testdataset, batch_size=330, shuffle=False, num_workers=0, pin_memory=True)
+  testloader = DataLoader(testdataset, batch_size=200, shuffle=False, num_workers=0, pin_memory=True)
 
   model.eval()
-  probsm = nn.Softmax(dim=1)
   writelist = []
-  for index, (images, labels, imgpath) in enumerate(testloader):
+  regrsteps = torch.linspace(0, 1.0, steps=lk).cuda()
+  probsm = nn.Softmax(dim=1)
+  for index, outitem in enumerate(testloader):
+    images = outitem["imgs"]
+    labels = outitem["label"]
+    imgpath = outitem["imgpath"]
     images, labels = images.cuda(), labels.cuda()
-    logit = model(images)
-    prob = probsm(logit)
-    acc = accuracy(logit, labels)
+    # b f c w h
+    map_score = 0
+    for subi in range(images.shape[1]):
+      logit, dislogit = model(images[:, subi, :, :, :])
+      # logit = model(images[:, subi, :, :, :])
+      # expectprob = probsm(logit)
+      # map_score += expectprob.detach().cpu().numpy()[:, 1]
+      prob = probsm(logit)
+      expectprob = torch.sum(regrsteps * prob, dim=1)
+      map_score += expectprob.detach().cpu().numpy()
+
+    map_score = map_score / images.shape[1]
+
+    tmplogit = torch.zeros(images.size(0), 2).cuda()
+    tmplogit[:, 1] = torch.from_numpy(map_score)
+    tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
+
+    acc = accuracy(tmplogit, labels)
     averagemetermap["acc_am"].update(acc[0].item())
     for idx, imgpathitem in enumerate(imgpath):
-      writelist.append("{:.5f} {:.5f} {:.5f}\n".format(labels[idx].detach().cpu().numpy(), float(prob[idx][0]), float(prob[idx][1])))
+      writelist.append(
+        "{:.5f} {:.5f} {:.5f} {}\n".format(labels[idx].detach().cpu().numpy(), float(tmplogit[idx][0]),
+                                        float(tmplogit[idx][1]), imgpathitem))
 
   for witem in writelist:
     the_file.write(witem)
   the_file.close()
 
-  ssan_performances_val(strscorepath)
+  hter = ssan_performances_val(strscorepath)
+
+
+
+  # Replay_attack, Video vs real
+  with open(strscorepath, "r") as the_file:
+    testlists = the_file.readlines()
+    the_file.close()
+
+  # printed photo
+  # strscorepath_pp = "{}_printedphoto".format(strscorepath)
+  # with open(strscorepath_pp, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     if "/real/" in imgpath:
+  #       the_file_pp.write("{}".format(imgpath))
+  #     if "/attack_print" in imgpath:
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file.close()
+  #
+  # hter = ssan_performances_val(strscorepath_pp)
+
+  strscorepath_C1 = "{}_C1".format(strscorepath)
+  with open(strscorepath_C1, "w") as the_file_pp:
+    for imgpath in testlists:
+      if "/1/" in imgpath or "/3/" in imgpath or "/4/" in imgpath or "/5/" in imgpath:
+        the_file_pp.write("{}".format(imgpath))
+
+    the_file.close()
+  hter = ssan_performances_val(strscorepath_C1)
+
+  strscorepath_C2 = "{}_C2".format(strscorepath)
+  with open(strscorepath_C2, "w") as the_file_pp:
+    for imgpath in testlists:
+      if "/2/" in imgpath or "/6/" in imgpath or "/7/" in imgpath or "/8/" in imgpath:
+        the_file_pp.write("{}".format(imgpath))
+
+    the_file.close()
+  hter = ssan_performances_val(strscorepath_C2)
+#90.31 91.83 97.84
+#96.02 91.82 90.38 96.80 91.01 98.37
+  strscorepath_C3 = "{}_C3".format(strscorepath)
+  with open(strscorepath_C3, "w") as the_file_pp:
+    for imgpath in testlists:
+      if "/HR_" in imgpath:
+        the_file_pp.write("{}".format(imgpath))
+
+    the_file.close()
+  hter = ssan_performances_val(strscorepath_C3)
+  return 0
+
+  #real/2_2_45_1   phone session
+
+  # strscorepath_P1 = "{}_P1".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "1":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+  #
+  # strscorepath_P1 = "{}_P2".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "2":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+  #
+  # strscorepath_P1 = "{}_P3".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "3":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+  #
+  # strscorepath_P1 = "{}_P4".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "4":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+  #
+  # strscorepath_P1 = "{}_P5".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "5":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+  #
+  # strscorepath_P1 = "{}_P6".format(strscorepath)
+  # with open(strscorepath_P1, "w") as the_file_pp:
+  #   for imgpath in testlists:
+  #     strtoken = imgpath.split()
+  #     strtoken = strtoken[3].split("/")
+  #     Ptype = strtoken[8].split("_")[0]
+  #     if Ptype == "6":
+  #       the_file_pp.write("{}".format(imgpath))
+  #   the_file_pp.close()
+  # hter = ssan_performances_val(strscorepath_P1)
+
+  # real/2_2_45_1   phone session
+
+  strscorepath_S1 = "{}_S1".format(strscorepath)
+  with open(strscorepath_S1, "w") as the_file_pp:
+    for imgpath in testlists:
+      strtoken = imgpath.split()
+      strtoken = strtoken[3].split("/")
+      Ptype = strtoken[8].split("_")[1]
+      if Ptype == "1":
+        the_file_pp.write("{}".format(imgpath))
+    the_file_pp.close()
+  hter = ssan_performances_val(strscorepath_S1)
+
+  strscorepath_S1 = "{}_S2".format(strscorepath)
+  with open(strscorepath_S1, "w") as the_file_pp:
+    for imgpath in testlists:
+      strtoken = imgpath.split()
+      strtoken = strtoken[3].split("/")
+      Ptype = strtoken[8].split("_")[1]
+      if Ptype == "2":
+        the_file_pp.write("{}".format(imgpath))
+    the_file_pp.close()
+  hter = ssan_performances_val(strscorepath_S1)
+
+  strscorepath_S1 = "{}_S3".format(strscorepath)
+  with open(strscorepath_S1, "w") as the_file_pp:
+    for imgpath in testlists:
+      strtoken = imgpath.split()
+      strtoken = strtoken[3].split("/")
+      Ptype = strtoken[8].split("_")[1]
+      if Ptype == "3":
+        the_file_pp.write("{}".format(imgpath))
+    the_file_pp.close()
+  hter = ssan_performances_val(strscorepath_S1)
+
+  return hter
 
 
 if __name__ == '__main__':
@@ -509,4 +686,22 @@ if __name__ == '__main__':
   basesavescorepath = "./testmodel"
   strckpt = "/home/user/model_2022/v4C3_sample_siamese/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220609_X3esnupQ4pY6fJ463aJdsH_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_msegrlloss_resnet18_adam_full/epoch_39.ckpt"
   testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db.sort"
-  testsiamesewckpt(None, strckpt, testdbpath, basesavescorepath, 8)
+  # testsiamesewckpt(None, strckpt, testdbpath, basesavescorepath, 8)
+
+#
+  # basesavescorepath = "./testmodel"
+  # strckpt = "/home/user/model_2022/v4C3_sample/Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260_220609_g6EFVegwp5sEGnM9CXoqNe_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_msegrlloss_resnet18_adam_full/epoch_121.ckpt"
+  # testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_REPLAY_1by1_260x260.db.sort"
+  # testwckpt(None, strckpt, testdbpath, basesavescorepath, 11)
+
+  basesavescorepath = "./testmodel"
+  #strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220715_g7bNVmgBGbBgquj2fhw96v_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_10_seed_20200102_k_10/epoch_62.ckpt"
+  strckpt = "/home/user/data2/model_rebuttal_R1/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220903_6LDsBLvTuamV9kbETYdibu_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_rebuttal_R1_lamda_0.75//epoch_143.ckpt"
+  testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db.sort"
+  testwckpt(None, strckpt, testdbpath, basesavescorepath, 11)
+
+  # basesavescorepath = "./testmodel"
+  # strckpt = "/home/user/model_2022/v4C3_sample/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260_220610_PAFXdBobwA9vmiucF3Z5kf_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_msegrlloss_resnet18_adam_half/epoch_82.ckpt"
+  # testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_OULU_1by1_260x260.db.sort"
+  # testwckpt(None, strckpt, testdbpath, basesavescorepath, 11)
+

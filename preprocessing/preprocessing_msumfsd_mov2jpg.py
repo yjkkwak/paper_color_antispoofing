@@ -61,8 +61,11 @@ def convertavi2jpg(movpath):
 def splittraintest():
   trainids = []
   testids = []
-  strtraininfo = "/home/user/work_db/PublicDB/MSU-MFSD/train_sub_list.txt"
-  strtestinfo = "/home/user/work_db/PublicDB/MSU-MFSD/test_sub_list.txt"
+  # strtraininfo = "/home/user/work_db/PublicDB/MSU-MFSD/train_sub_list.txt"
+  # strtestinfo = "/home/user/work_db/PublicDB/MSU-MFSD/test_sub_list.txt"
+
+  strtraininfo = "/home/user/data1/DBs/antispoofing/MSU-MFSD/MSU-MFSD/train_sub_list.txt"
+  strtestinfo = "/home/user/data1/DBs/antispoofing/MSU-MFSD/MSU-MFSD/test_sub_list.txt"
   with open(strtraininfo, "r") as the_file:
     strlines = the_file.readlines()
     the_file.close()
@@ -76,14 +79,16 @@ def splittraintest():
     testids.append(strline.strip())
   print(trainids)
   print(testids)
-  videopath = "/home/user/work_db/PublicDB/MSU-MFSD/scene01"
-  fmovlist = glob.glob("{}/**/*.mov".format(videopath), recursive=True)
+  #videopath = "/home/user/work_db/PublicDB/MSU-MFSD/scene01"
+
+  videopath = "/home/user/data1/DBs/antispoofing/MSU-MFSD/MSU-MFSD/scene01"
+  # fmovlist = glob.glob("{}/**/*.mov".format(videopath), recursive=True)
   fmp4list = glob.glob("{}/**/*.mp4".format(videopath), recursive=True)
 
-  print (len(fmovlist), fmovlist[0])
+  # print (len(fmovlist), fmovlist[0])
   print(len(fmp4list), fmp4list[0])
 
-  for fmovitem in fmovlist:
+  for fmovitem in fmp4list:
 
     dname = os.path.dirname(fmovitem)
     fname = os.path.basename(fmovitem)
@@ -100,7 +105,7 @@ def splittraintest():
       os.makedirs(destdname, exist_ok=True)
 
     destpath = os.path.join(destdname, fname)
-    copyfile(fmovitem, destpath)
+    copyfile (fmovitem, destpath)
 
 def main():
   # splittraintest()

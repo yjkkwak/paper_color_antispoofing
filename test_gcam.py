@@ -233,7 +233,7 @@ def testmodelallimgswckpt_gcam(model, strckptfilepath, testdbpath, strckptpath, 
       continue
 
 
-    to_pil_image(images[0]).save("./img_real2.png")
+    to_pil_image(images[0]).save("./img_attack.png")
 
     images, labels = images.cuda(), labels.cuda()
 
@@ -254,7 +254,7 @@ def testmodelallimgswckpt_gcam(model, strckptfilepath, testdbpath, strckptpath, 
     CAMs = returnCAM(features_blobs[0], weight_softmax, [idx[0].item()])
 
     # render the CAM and output
-    img = cv2.imread("img_real2.png")
+    img = cv2.imread("img_attack.png")
     height, width, _ = img.shape
     CAM = cv2.resize(CAMs[0], (width, height))
     heatmap = cv2.applyColorMap(CAM, cv2.COLORMAP_JET)
@@ -278,13 +278,13 @@ if __name__ == '__main__':
   basesavescorepath = "./testmodel"
 
   testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db.sort"
-  # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_npbzUdpRQBqyns6gNcYiMw_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_6_again_allimgtest_seed_20220406_k_6/epoch_10.ckpt"
+  ## strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_npbzUdpRQBqyns6gNcYiMw_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_6_again_allimgtest_seed_20220406_k_6/epoch_10.ckpt"
   # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 6)
   #
   # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_Eymf7QzSBbtetV9aeP4bUf_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_11_again_allimgtest_seed_20220406_k_11/epoch_09.ckpt"
   # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 11)
   #
-  # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_VWbTmUnwMz2BTAcLfBfoqK_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_21_again_allimgtest_seed_20220406_k_21/epoch_73.ckpt"
+  # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_VWbTmUnwMz2BTAcLfBfoqK_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_21_again_allimgtest_seed_20220406_k_21/epoch_75.ckpt"
   # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 21)
   #
   # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_G3wTq2DsjhCA6WHeHibAUJ_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_31_again_allimgtest_seed_20220406_k_31/epoch_42.ckpt"
@@ -293,10 +293,18 @@ if __name__ == '__main__':
   # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_JgMBJBGWgeyt8AUkdPmYiU_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_41_again_allimgtest_seed_20220406_k_41/epoch_131.ckpt"
   # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 41)
 
-  strckpt = "/home/user/model_2022/v4C3_sample_ablation/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220612_KYi5fUhoVpxgrrb4orHVCe_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_clsloss_resnet18_adam_baseline_again/epoch_01.ckpt"
-  testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 2)
+  # strckpt = "/home/user/model_2022/v4C3_sample_ablation/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220612_KYi5fUhoVpxgrrb4orHVCe_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_clsloss_resnet18_adam_baseline_again/epoch_117.ckpt"
+  # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 2)
   #
 
-  #
+  strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220726_kjZHmLAyZVqzNFbxkkD5xB_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_6_again_allimgtest_againallsave_seed_20220406_k_6/epoch_70.ckpt"
+  testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 6)
 
-  ##
+  strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220726_J4Ebg35piDhkbpBEqasVgJ_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_21_again_allimgtest_againallsave_seed_20220406_k_21//epoch_72.ckpt"
+  testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 21)
+
+  strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220726_ZSeV2FeYhEKFwHDAN7Y4Sn_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_31_again_allimgtest_againallsave_seed_20220406_k_31//epoch_72.ckpt"
+  testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 31)
+
+  # strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260_220725_JgMBJBGWgeyt8AUkdPmYiU_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_41_again_allimgtest_seed_20220406_k_41/epoch_131.ckpt"
+  # testmodelallimgswckpt_gcam(None, strckpt, testdbpath, basesavescorepath, 41)

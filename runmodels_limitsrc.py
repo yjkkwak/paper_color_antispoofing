@@ -1,12 +1,13 @@
 import os
 
 def runjobs():
-  strbaseckpt = "/home/user/model_2022/v4C3_sample_ablation/"
+  #strbaseckpt = "/home/user/model_2022/v4C3_sample_ablation/"
+  strbaseckpt = "/home/user/data2/model_rebuttal_RX_lamda1.0_limitsrc/"
   strpython = "python -u /home/user/work_2022/Paper_AntiSpoofing/train_regwgrl_limitsrc.py"
 
-  strlr = 0.0003
+  strlr = 0.0002
   strgamma = 0.99
-  nepoch = 1000
+  nepoch = 300
   strbsize = 32
   stropti = "adam"
 
@@ -19,7 +20,7 @@ def runjobs():
   strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00035
+  strlr = 0.00025
   strrandom_seed = 20220408
   strgpu = 2
   strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"

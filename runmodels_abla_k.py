@@ -26,7 +26,7 @@ def runjobs():
   # strDB = "Train_Protocal_4C3_CASIA_MSU_OULU_1by1_260x260"
   strk = 6
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed, strk)
-  return
+
   strseed = 20220406
   strgpu = 1
   strk = 21
@@ -46,7 +46,7 @@ def runjobs():
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed, strk)
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed, strk):
-  strmeta = "mseregloss_resnet18_{}_baseline_{}_again_allimgtest".format(stropti, strk)
+  strmeta = "mseregloss_resnet18_{}_baseline_{}_again_allimgtest_againallsave".format(stropti, strk)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
                                                       "MESREG",

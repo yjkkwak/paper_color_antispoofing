@@ -204,13 +204,17 @@ def trainmodel():
     logger.print (strprint)
     scheduler.step()
     if averagemetermap["acc_am"].avg > 93.0:#98
-      #hter = testmodel(epoch, mynet, testdbpath, strckptpath, args.lk)
-      hter = testmodelallimgs(epoch, mynet, testdbpath, strckptpath, args.lk)
+      hter = testmodel(epoch, mynet, testdbpath, strckptpath, args.lk)
+      # hter = testmodelallimgs(epoch, mynet, testdbpath, strckptpath, args.lk)
+
+
 
       if besthter > hter:
         besthter = hter
         save_ckpt(epoch, mynet, optimizer)
         copyfile(strlogpath, "{}/trainlog_1.txt".format(strckptpath))
+      elif epoch > 50:
+        save_ckpt(epoch, mynet, optimizer)
 
 
 if __name__ == '__main__':
