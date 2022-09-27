@@ -222,7 +222,7 @@ class lmdbDatasettestAllimages(tdata.Dataset):
 
 
 class lmdbDatasetwmixup(tdata.Dataset):
-  def __init__(self, db_path, transform=None, lk=10):
+  def __init__(self, db_path, transform=None, lk=11):
     # 11 -1 -> 10
     self.lk = lk-1
     self.env = None
