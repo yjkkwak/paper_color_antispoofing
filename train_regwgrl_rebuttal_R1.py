@@ -72,7 +72,7 @@ strlogpath = "/home/user/work_2022/logworkspace/{}.log".format(struuid)
 logger = Logger(strlogpath)
 logger.print(args)
 
-dbprefix = "/home/user/work_db/v4C3"
+dbprefix = "/home/user/data2/work_db/v4C3"
 
 if "CASIA_MSU_OULU" in args.lmdbpath:
   testdbpath = os.path.join(dbprefix, "Test_Protocal_4C3_REPLAY_1by1_260x260.db.sort")
@@ -164,7 +164,7 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDatasetwmixup(args.lmdbpath, transforms)
+  traindataset = lmdbDatasetwmixup(args.lmdbpath, transforms, 11)
 
   logger.print(mynet)
   logger.print(traindataset)

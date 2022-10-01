@@ -3,7 +3,7 @@ import os
 def runjobs():
   # strbaseckpt = "/home/user/model_2022/v4C3_sample/"
   #strbaseckpt = "/home/user/model_2022/v4C3_sample_K/"
-  strbaseckpt = "//home/user/data2/model_rebuttal_RX_lamda1.0/"
+  strbaseckpt = "/home/user/data2/model_rebuttal_RX_lamda1.0/"
   #strbaseckpt = "//home/user/data2/model_rebuttal_R1_lamda1.0/"
   # strbaseckpt = "/home/user/model_2022/v4C3_sample_siamese/"
   #strbaseckpt = "/home/user/model_2022/v4C3_sample_ablation/"
@@ -40,15 +40,15 @@ def runjobs():
   # strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   # send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
-  strlr = 0.00012
+  strlr = 0.00016
   strseed = 20220408
-  strgpu = 0
-  strDB = "Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260"
-  send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
+  # strgpu = 0
+  # strDB = "Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260"
+  # send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
-  strseed = 20220908
+  strseed = 20220930
   strgpu = 1
-  strDB = "Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260"
+  strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
   strseed = 20220408
@@ -76,7 +76,7 @@ def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch,
                                                       "meta{}".format(strmeta),
                                                       "seed{}".format(strseed))
   screenoption = "screen -L -Logfile {}.txt -d -m ".format(strlogoption)
-  lmdbpath = "/home/user/work_db/v4C3/{}.db".format(strDB)
+  lmdbpath = "/home/user/data2/work_db/v4C3/{}.db".format(strDB)
   strcmd = "{} {} --ckptpath {} --lmdbpath {} --lr {}  --gamma {} --opt {} --epochs {} --batch_size {} --GPU {} --meta {} --random_seed {}".format(
     screenoption, strpython, strbaseckpt, lmdbpath, strlr, strgamma, stropti, nepoch, strbsize, strgpu, strmeta, strseed)
   os.system(strcmd)
