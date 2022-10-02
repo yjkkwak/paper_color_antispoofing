@@ -19,7 +19,7 @@ def runjobs():
   strseed = 20220406
   strlr = 0.0001
   strgamma = 0.99
-  nepoch = 300
+  nepoch = 150
   strbsize = 16
   stropti = "adam"
 
@@ -40,23 +40,25 @@ def runjobs():
   # strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   # send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
-  strlr = 0.00016
+  strlr = 0.000166
   strseed = 20220408
   # strgpu = 0
   # strDB = "Train_Protocal_4C3_CASIA_OULU_REPLAY_1by1_260x260"
-  # send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
-
-  strseed = 20220930
+  # send4C4jobs(s trpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
+  strlr = 0.00018
+  strseed = 20200908
   strgpu = 1
   strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
-  strseed = 20220408
+  strlr = 0.00018
+  strseed = 20210908
   strgpu = 2
   strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
 
-  strseed = 20220908
+  strlr = 0.00018
+  strseed = 20190908
   strgpu = 3
   strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed)
@@ -64,7 +66,7 @@ def runjobs():
 
 
 def send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strseed):
-  strmeta = "mseregloss_resnet18_{}_rebuttal_RX_samelamda".format(stropti)
+  strmeta = "mseregloss_resnet18_{}_rebuttal_RX_samelamdas".format(stropti)
   strlogoption = "log_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(strDB,
                                                       stropti,
                                                       "MESREG",

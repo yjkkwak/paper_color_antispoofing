@@ -74,7 +74,7 @@ strlogpath = "/home/user/work_2022/logworkspace/{}.log".format(struuid)
 logger = Logger(strlogpath)
 logger.print(args)
 
-dbprefix = "/home/user/work_db/v4C3"
+dbprefix = "/home/user/data2/work_db/v4C3"
 ##CASIA-MFSD REPLAY-ATTACK
 
 # if args.GPU < 2:
@@ -118,7 +118,7 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
     expectprob = torch.sum(regrsteps * prob, dim=1)
     mseloss = criterion["mse"](expectprob, labels)
     advclsloss = criterion["cls"](dislogit, uid1)
-    loss = mseloss + advclsloss
+    loss = mseloss + 0.001*advclsloss
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
@@ -159,7 +159,8 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
+  #traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
+  traindataset = lmdbDatasetwmixupwlimit(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
   logger.print(traindataset)
@@ -198,7 +199,7 @@ def trainmodel():
     logger.print (strprint)
     scheduler.step()
     if averagemetermap["acc_am"].avg > 90.0:#98
-      hter1 = testmodel(epoch, mynet, testdbpath, strckptpath)
+      hter1 = testmodel(epoch, mynet, testdbpath, strckptpath, 11)
       if besthter1 > hter1:
         besthter1 = hter1
         save_ckpt(epoch, mynet, optimizer)

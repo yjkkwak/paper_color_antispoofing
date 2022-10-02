@@ -150,7 +150,7 @@ class lmdbDatasettest(tdata.Dataset):
     #frames_total = 8
     frames_total = self.frames_total # 1
     files_total = len(listofindex)
-    interval = files_total // 10
+    interval = files_total // 12
     imgs = torch.zeros((frames_total, 3, 256, 256))
     # imgpath = ""
     for ii in range(frames_total):
@@ -410,8 +410,8 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       # ignore  -> limit src
-      if "CASIA-MFSD" in strline: continue
-      if "OULU-NPU" in strline: continue
+      # if "CASIA-MFSD" in strline: continue
+      # if "OULU-NPU" in strline: continue
       # only contaion -> cross modal
       if self.strinclude in strline:
         if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
@@ -425,9 +425,9 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
-    self.videokeys = list(self.videopath.keys())
+    # self.videokeys = list(self.videopath.keys())
     # self.videokeys = []
-    # self.videokeys.extend(55*list(self.videopath.keys()))
+    self.videokeys.extend(30*list(self.videopath.keys()))
 
   def __len__(self):
     return len(self.videokeys)
@@ -655,13 +655,13 @@ if __name__ == '__main__':
                           T.RandomCrop((256, 256)),
                           T.ToTensor()])  # 0 to 1
 
-  # mydataset = lmdbDatasettest("/home/user/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db.sort", transforms)
-  mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260.db",
-                          transforms)
+  mydataset = lmdbDatasettest("/home/user/data2/work_db/v4C3/Test_Protocal_4C3_MSU_1by1_260x260.db.sort", 8, transforms)
+  # mydataset = lmdbDatasetwmixup("/home/user/work_db/v4C3/Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260.db",
+  #                         transforms)
   trainloader = DataLoader(mydataset, batch_size=100, shuffle=True, num_workers=0, pin_memory=False)
-  for imgp1, label, imgpath, rimg, lam, uid1, uid2 in trainloader:
-  # for imgmap in trainloader:
-  #   imgs = imgmap["imgs"]
+  # for imgp1, label, imgpath, rimg, lam, uid1, uid2 in trainloader:
+  for imgmap in trainloader:
+    imgs = imgmap["imgs"]
   #   for iii, fff in enumerate(label):
   #     print (fff, imgpath[iii])
   #   break
@@ -669,10 +669,10 @@ if __name__ == '__main__':
   #     print(sid, imgs[0,sid,:,:,:].shape)
   #     print(sid, imgs[0, sid, :, :, :].flatten()[0:10])
   #     print(sid, imgs[1, sid, :, :, :].flatten()[0:10])
-  #     # print(subi, images_x[0, subi, :, :, :].flatten()[0:10])
-  #     # print(subi, images_x[1, subi, :, :, :].flatten()[0:10])
-  #     # to_pil_image(imgs[0,sid,:,:,:]).show()
-  #   break
+      # print(subi, images_x[0, subi, :, :, :].flatten()[0:10])
+      # print(subi, images_x[1, subi, :, :, :].flatten()[0:10])
+      # to_pil_image(imgs[0,sid,:,:,:]).show()
+    break
     # rand_idx = torch.randperm(rimg.shape[0])
     # vimgs = torch.cat((imgp1, rimg[rand_idx[0:rimg.shape[0]],]), dim=0)
     # vlabels = torch.cat((label, lam[rand_idx[0:rimg.shape[0]]]), dim=0)
