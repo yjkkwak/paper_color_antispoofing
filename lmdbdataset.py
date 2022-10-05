@@ -150,7 +150,7 @@ class lmdbDatasettest(tdata.Dataset):
     #frames_total = 8
     frames_total = self.frames_total # 1
     files_total = len(listofindex)
-    interval = files_total // 12
+    interval = files_total // 10#12(casia)
     imgs = torch.zeros((frames_total, 3, 256, 256))
     # imgpath = ""
     for ii in range(frames_total):
@@ -357,17 +357,18 @@ class lmdbDatasetwmixup(tdata.Dataset):
     bbx1, bby1, bbx2, bby2 = self.rand_bbox(img.size(), 1 - lam)
     lam = (bbx2 - bbx1) * (bby2 - bby1) / (img.size()[1] * img.size()[2])
     # print(lam, imgpath, rimgpath)
+    ## WO LD
     rimg[:, bbx1:bbx2, bby1:bby2] = img[:, bbx1:bbx2, bby1:bby2]
 
     if rlabel == 1:
       lam = 1.0 - lam
 
-    ### R2
+    ### R2 WO LE
     # if lam > 0.5:
     #   lam = 1.0
     # else:
     #   lam = 0.0
-    ###
+    ##
     return img, label, imgpath, rimg, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
 
 
@@ -422,11 +423,12 @@ class lmdbDatasetwmixupwlimit(tdata.Dataset):
             strtokens = strline.split(".mp4")
             strkey = "{}.mp4".format(strtokens[0])
           self.setkeys(strkey, index)
+          # print(strline, strkey, index)
         elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
           strkey = os.path.dirname(strline)
           self.setkeys(strkey, index)
     # self.videokeys = list(self.videopath.keys())
-    # self.videokeys = []
+    self.videokeys = []
     self.videokeys.extend(30*list(self.videopath.keys()))
 
   def __len__(self):

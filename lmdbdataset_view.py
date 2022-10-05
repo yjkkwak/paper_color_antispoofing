@@ -46,8 +46,12 @@ class lmdbDatasetwmixupview(tdata.Dataset):
     for index, strline in enumerate(strlines):
       strline = strline.strip()
       if "MSU-MFSD" in strline or "REPLAY-ATTACK" in strline:
-        strtokens = strline.split(".mov")
-        strkey = "{}.mov".format(strtokens[0])
+        if ".mov" in strline:
+          strtokens = strline.split(".mov")
+          strkey = "{}.mov".format(strtokens[0])
+        else:
+          strtokens = strline.split(".mp4")
+          strkey = "{}.mp4".format(strtokens[0])
         self.setkeys(strkey, index)
       elif "OULU-NPU" in strline or "CASIA-MFSD" in strline:
         strkey = os.path.dirname(strline)
@@ -146,7 +150,7 @@ class lmdbDatasetwmixupview(tdata.Dataset):
 
     if rlabel == 1:
       lam = 1.0 - lam
-    return img, label, imgpath, rimg, rimg_clone, rlabel, lam
+    return img, label, imgpath, rimg, rimg_clone, rlabel, lam, self.uuid[strtoken[5]], self.uuid[strrtoken[5]]
 
 if __name__ == '__main__':
 
@@ -155,19 +159,19 @@ if __name__ == '__main__':
                           #T.RandomCrop((256, 256)),
                           T.ToTensor()])  # 0 to 1
 
-  mydataset = lmdbDatasetwmixupview("/home/user/work_db/v4C3/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260.db",
+  mydataset = lmdbDatasetwmixupview("/home/user/data2/work_db/v4C3/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260.db",
                           transforms)
-  trainloader = DataLoader(mydataset, batch_size=100, shuffle=False, num_workers=0, pin_memory=False)
-  for img, label, imgpath, rimg, rimg_clone, rlabel, lam in trainloader:
+  trainloader = DataLoader(mydataset, batch_size=100, shuffle=True, num_workers=0, pin_memory=False)
+  for img, label, imgpath, rimg, rimg_clone, rlabel, lam, dname1, dname2 in trainloader:
     print (imgpath[4], lam[4])
     for idx, iti in enumerate(label):
       if iti == 1:
-        to_pil_image(img[idx]).save("./live_{}.png".format(idx))
-        to_pil_image(rimg_clone[idx]).save("./fake_{}.png".format(idx))
-        to_pil_image(rimg[idx]).save("./live_fake_cutmix_{}_{}.png".format(idx, lam[idx]))
+        to_pil_image(img[idx]).save("./aa_live_{}_{}.png".format(idx, dname1[idx]))
+        to_pil_image(rimg_clone[idx]).save("./aa_fake_{}_{}.png".format(idx, dname2[idx]))
+        to_pil_image(rimg[idx]).save("./aa_live_fake_cutmix_{}_{}.png".format(idx, lam[idx]))
       elif iti == 0:
-        to_pil_image(img[idx]).save("./fake_{}.png".format(idx))
-        to_pil_image(rimg_clone[idx]).save("./live_{}.png".format(idx))
-        to_pil_image(rimg[idx]).save("./fake_live_cutmix_{}_{}.png".format(idx, lam[idx]))
+        to_pil_image(img[idx]).save("./aa_fake_{}_{}.png".format(idx, dname1[idx]))
+        to_pil_image(rimg_clone[idx]).save("./aa_live_{}_{}.png".format(idx, dname2[idx]))
+        to_pil_image(rimg[idx]).save("./aa_fake_live_cutmix_{}_{}.png".format(idx, lam[idx]))
 
     break

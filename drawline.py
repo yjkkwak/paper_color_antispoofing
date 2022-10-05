@@ -33,19 +33,19 @@ CB91_Amber = '#F5B14C'
 
 
 def drawsubfig():
-  date = [2, 5, 7, 8, 9, 10, 11, 12, 15, 20, 30]#, 40, 50, 60, 70, 100]
-  xticks = [2, 5, 7, 8, 9, 10, 11, 12, 15, 20, 30]#, 40, 50, 60, 70, 100]
-  temperature = [16.94, 15.45, 14.7, 14.52, 14.71, 13.4, 15.37, 15.64, 18.99, 16.57, 19.92]#, 18.8, 18.8, 18.8, 16.94, 20.1]
-  price = [90.48, 88.91, 91.58, 92.9, 92.43, 92.66, 92.04, 89.93, 87.15, 89.86, 85.47]#, 86.17, 88.85, 89.94, 88.02,86.27]
+  date = [2, 3,4,5]#, 40, 50, 60, 70, 100]
+  xticks = [2, 3,4,5]#, 40, 50, 60, 70, 100]
+  temperature = [16.37, 12.25, 14.75, 14.0]
+  price = [91.11, 91.10, 92.54, 92.99]
 
 
-  fig, ax1 = plt.subplots(1, 2, figsize=(17, 3))
+  fig, ax1 = plt.subplots(1, 2, figsize=(10, 3))
   #ax2 = ax1.twinx()
 
-  threshold = 15.45
+  threshold = 16.25
   ax1[0].axhline(threshold, color=CB91_Pink, linestyle=':', lw=2, label='Baseline (ResNet18)')
 
-  threshold = 89.84
+  threshold = 85.06
   ax1[1].axhline(threshold, color=CB91_Blue, linestyle=':', lw=2, label='Baseline (ResNet18)')
 
   ax1[0].plot(date, temperature, color=CB91_Pink, marker='o', linestyle='-', lw=2, label='Our approach with K')
@@ -76,21 +76,19 @@ def drawsubfig():
 
 
 def drawfig():
-  date = [2, 5, 7, 8, 9, 10, 11, 12, 15]#, 40, 50, 60, 70, 100]
-  xticks = [2, 5, 7, 8, 9, 10, 11, 12, 15]#, 40, 50, 60, 70, 100]
+  date = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]#, 40, 50, 60, 70, 100]
+  xticks = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]#, 40, 50, 60, 70, 100]
   #temperature = [16.94, 15.45, 14.7, 14.52, 14.71, 13.4, 15.37, 15.64, 18.99]#, 18.8, 18.8, 18.8, 16.94, 20.1]
-  price = [90.48, 88.91, 91.58, 92.9, 92.43, 92.66, 92.04, 89.93, 88.55]#, 86.17, 88.85, 89.94, 88.02,86.27]
+  price = [91.11, 91.1, 92.54, 92.99, 95.59, 93.84, 95.5, 96.07, 97.6, 95.87, 95.29, 96.25, 94.72, 94.75, 93.07, 94.03]
 
 
   # fig, ax1 = plt.subplots(1, 2, figsize=(17, 3))
   #ax2 = ax1.twinx()
 
   # threshold = 15.45
-  fig = plt.figure(figsize=(9, 4))
-  threshold = 88.64
-  plt.axhline(threshold, color=CB91_Pink, linestyle=':', lw=2, label='Baseline (ResNet18)')
-
-
+  fig = plt.figure(figsize=(10, 4))
+  threshold = 88.06
+  # plt.axhline(threshold, color=CB91_Amber, linestyle=':', lw=2, label='Baseline (ResNet18)')
   plt.plot(date, price, color=CB91_Blue, marker='o', linestyle='-', lw=2, label='Our approach with K')
 
 
@@ -107,7 +105,7 @@ def drawfig():
 
 
   plt.show()
-  #plt.savefig("./fig_3_pdf.pdf",bbox_inches='tight')
+  # plt.savefig("./fig_3_pdf.pdf",bbox_inches='tight')
 
 if __name__ == '__main__':
   drawfig()

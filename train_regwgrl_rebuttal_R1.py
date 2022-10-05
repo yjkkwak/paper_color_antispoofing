@@ -205,13 +205,16 @@ def trainmodel():
     if averagemetermap["acc_am"].avg > 93.0:#98
       # if "CASIA_OULU_REPLAY" in args.lmdbpath:
       #   #
-      #   hter = testmodelallimgs(epoch, mynet, testdbpath, strckptpath, 11)
+      # hter = testmodelallimgs(epoch, mynet, testdbpath, strckptpath, 11)
       # else:
       hter = testmodel(epoch, mynet, testdbpath, strckptpath, 11)
       if besthter > hter:
         besthter = hter
         save_ckpt(epoch, mynet, optimizer)
         copyfile(strlogpath, "{}/trainlog.txt".format(strckptpath))
+
+#############3
+    if epoch > 300: break
 
 
 if __name__ == '__main__':

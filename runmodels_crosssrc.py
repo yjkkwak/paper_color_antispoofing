@@ -6,33 +6,34 @@ def runjobs():
 
 
   strgamma = 0.99
-  nepoch = 150
+  nepoch = 50
   strbsize = 16
 
   stropti = "adam"
   #C , sgd
-  strlr = 0.00018
-  strrandom_seed = 20200908
+  strlr = 0.00012
+  strrandom_seed = 20211908
   strgpu = 0
-  strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
-  # send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
+  strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
+  send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00018
+  strrandom_seed = 20210908
+  strlr = 0.0001
   strgpu = 1
-  strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
+  strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
   #R
-  strlr = 0.00018
-  strrandom_seed = 20200909
+  strrandom_seed = 202109081
+  strlr = 0.00013
   strgpu = 2
-  strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
+  strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
-  strlr = 0.00018
-  strrandom_seed = 20200910
+  strrandom_seed = 202109083
+  strlr = 0.00015
   strgpu = 3
-  strDB = "Train_Protocal_4C3_CASIA_MSU_REPLAY_1by1_260x260"
+  strDB = "Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260"
   send4C4jobs(strpython, strbaseckpt, strDB, stropti, strlr, strgamma, nepoch, strbsize, strgpu, strrandom_seed)
 
 

@@ -118,7 +118,7 @@ def trainepoch(epoch, trainloader, model, criterion, optimizer, averagemetermap)
     expectprob = torch.sum(regrsteps * prob, dim=1)
     mseloss = criterion["mse"](expectprob, labels)
     advclsloss = criterion["cls"](dislogit, uid1)
-    loss = mseloss + 0.001*advclsloss
+    loss = mseloss# + 0.001*advclsloss
     tmplogit = torch.zeros(images.size(0), 2).cuda()
     tmplogit[:, 1] = expectprob
     tmplogit[:, 0] = 1.0 - tmplogit[:, 1]
@@ -159,7 +159,7 @@ def trainmodel():
                           T.RandomHorizontalFlip(),
                           T.ToTensor()])  # 0 to 1
 
-  #traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
+  # traindataset = lmdbDatasetwmixupwlimit2(args.lmdbpath, strinclude, transforms)
   traindataset = lmdbDatasetwmixupwlimit(args.lmdbpath, strinclude, transforms)
 
   logger.print(mynet)
