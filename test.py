@@ -429,7 +429,7 @@ def testwckpt(model, strckptfilepath, testdbpath, strckptpath, lk):
   testdataset = lmdbDatasettest(testdbpath, frames_total, transforms)
 
   # print(testdataset)
-  testloader = DataLoader(testdataset, batch_size=200, shuffle=False, num_workers=0, pin_memory=True)
+  testloader = DataLoader(testdataset, batch_size=20, shuffle=False, num_workers=0, pin_memory=True)
 
   model.eval()
   writelist = []
@@ -684,7 +684,7 @@ if __name__ == '__main__':
 
 #  def testsiamesewckpt(model, strckptfilepath, testdbpath, strckptpath, frames_total=8):
   basesavescorepath = "./testmodel"
-  strckpt = "/home/user/model_2022/v4C3_sample_siamese/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220609_X3esnupQ4pY6fJ463aJdsH_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_msegrlloss_resnet18_adam_full/epoch_39.ckpt"
+  strckpt = "/home/user/model_2022/model_rebuttal_RX_lamda1.0/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_221001_fnsAcRP6FzUUR4wup2sU2Y_bsize16_optadam_lr0.00018_gamma_0.99_epochs_300_meta_mseregloss_resnet18_adam_rebuttal_RX_samelamda_lamda_1.0/epoch_63.ckpt"
   testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db.sort"
   # testsiamesewckpt(None, strckpt, testdbpath, basesavescorepath, 8)
 
@@ -696,8 +696,10 @@ if __name__ == '__main__':
 
   basesavescorepath = "./testmodel"
   #strckpt = "/home/user/model_2022/v4C3_sample_K/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220715_g7bNVmgBGbBgquj2fhw96v_bsize16_optadam_lr0.0001_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_baseline_10_seed_20200102_k_10/epoch_62.ckpt"
-  strckpt = "/home/user/data2/model_rebuttal_R1/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220903_6LDsBLvTuamV9kbETYdibu_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_rebuttal_R1_lamda_0.75//epoch_143.ckpt"
-  testdbpath = "/home/user/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db.sort"
+  #strckpt = "/home/user/data2/model_rebuttal_R1/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_220903_6LDsBLvTuamV9kbETYdibu_bsize16_optadam_lr0.00016_gamma_0.99_epochs_1000_meta_mseregloss_resnet18_adam_rebuttal_R1_lamda_0.75//epoch_143.ckpt"
+  strckpt = "/home/user/data2/model_rebuttal_RX_reproduce/Train_Protocal_4C3_MSU_OULU_REPLAY_1by1_260x260_221003_TLhvDSzmrMGPyzsYvx4Tvb_bsize16_optadam_lr0.00018_gamma_0.99_epochs_150_meta_mseregloss_resnet18_adam_rebuttal_reproduce_lamda_1.0/epoch_63.ckpt"
+  #
+  testdbpath = "/home/user/data2/work_db/v4C3/Test_Protocal_4C3_CASIA_1by1_260x260.db.sort"
   testwckpt(None, strckpt, testdbpath, basesavescorepath, 11)
 
   # basesavescorepath = "./testmodel"

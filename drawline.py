@@ -51,14 +51,14 @@ def drawsubfig():
   ax1[0].plot(date, temperature, color=CB91_Pink, marker='o', linestyle='-', lw=2, label='Our approach with K')
   ax1[1].plot(date, price, color=CB91_Blue, marker='o', linestyle='-', lw=2, label='Our approach with K')
 
-  ax1[0].set_xlabel("K")
+  ax1[0].set_xlabel("K", fontsize=20)
   ax1[0].set_ylabel("HTER (%)", fontsize=20)
   ax1[0].set_xticks(xticks)
   ax1[0].legend(prop={'size': 12})
   # ax1[0].grid(True)
   # ax1[0].set_title("Impact of K in our method", fontsize=20)
 
-  ax1[1].set_xlabel("K")
+  ax1[1].set_xlabel("K", fontsize=20)
   ax1[1].set_ylabel("AUC (%)", fontsize=20)
   ax1[1].set_xticks(xticks)
   ax1[1].legend(prop={'size': 12})
@@ -86,15 +86,16 @@ def drawfig():
   #ax2 = ax1.twinx()
 
   # threshold = 15.45
-  fig = plt.figure(figsize=(10, 4))
-  threshold = 88.06
-  # plt.axhline(threshold, color=CB91_Amber, linestyle=':', lw=2, label='Baseline (ResNet18)')
-  plt.plot(date, price, color=CB91_Blue, marker='o', linestyle='-', lw=2, label='Our approach with K')
+  fig = plt.figure(figsize=(10, 4.8))
+  threshold = 90.06
+  plt.axhline(threshold, color=CB91_Pink, linestyle=':', lw=3, label='Baseline (ResNet18)')
+  plt.plot(date, price, color=CB91_Blue, marker='o', linestyle='-', lw=3, label='Our approach with K')
 
 
-  plt.xlabel("K")
+  plt.xlabel("K", fontsize=20)
   plt.ylabel("AUC (%)", fontsize=20)
-  plt.xticks(xticks)
+  plt.xticks(xticks, fontsize=12)
+  plt.yticks(fontsize=12)
   plt.legend(prop={'size': 12})
   # ax1[1].grid(True)
 
@@ -104,8 +105,8 @@ def drawfig():
   # fig.suptitle("BCFp", fontsize=20)
 
 
-  plt.show()
-  # plt.savefig("./fig_3_pdf.pdf",bbox_inches='tight')
+  # plt.show()
+  plt.savefig("./fig_3_pdf.pdf",bbox_inches='tight')
 
 if __name__ == '__main__':
   drawfig()

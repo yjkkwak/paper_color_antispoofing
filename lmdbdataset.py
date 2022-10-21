@@ -150,7 +150,7 @@ class lmdbDatasettest(tdata.Dataset):
     #frames_total = 8
     frames_total = self.frames_total # 1
     files_total = len(listofindex)
-    interval = files_total // 10#12(casia)
+    interval = files_total // 12#12(casia)
     imgs = torch.zeros((frames_total, 3, 256, 256))
     # imgpath = ""
     for ii in range(frames_total):
